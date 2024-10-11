@@ -1,7 +1,7 @@
 [project]
 name = "mta-open"
 version = "0.1.0"
-description = "Add your description here"
+description = "Data Analytics and Visualization Pipeline on MTA Open Vehicle Crash Dataset"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
@@ -26,6 +26,7 @@ dependencies = [
 dev = [
     "coverage>=7.6.2",
     "dagster-webserver>=1.8.11",
+    "mypy>=1.11.2",
     "pre-commit>=4.0.1",
     "pytest>=8.3.3",
 ]
