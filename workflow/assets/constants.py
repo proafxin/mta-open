@@ -1,3 +1,11 @@
+from pathlib import Path
+
+DATADIR = Path(__file__).parent.parent.parent / "data"
+OUTDIR = Path(__file__).parent / "data"
+if not OUTDIR.exists():
+    OUTDIR.mkdir(parents=True, exist_ok=True)
+
+VEHICLE_CRASH_FILENAME = "vehicle_crash.csv"
 TAXI_ZONES_FILE_PATH = "data/raw/taxi_zones.csv"
 TAXI_TRIPS_TEMPLATE_FILE_PATH = "data/raw/taxi_trips_{}.parquet"
 
