@@ -1,5 +1,6 @@
 
 tmp*
+*.duckdb
 data/vehicle_crash.csv
 *.csv
 *.parquet

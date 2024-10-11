@@ -5,6 +5,11 @@ OUTDIR = Path(__file__).parent / "data"
 if not OUTDIR.exists():
     OUTDIR.mkdir(parents=True, exist_ok=True)
 
+STAGINGDIR = OUTDIR / "staging"
+if not STAGINGDIR.exists():
+    STAGINGDIR.mkdir(parents=True, exist_ok=True)
+
+DUCKDB_LOCATION = STAGINGDIR / "data.duckdb"
 VEHICLE_CRASH_FILENAME = "vehicle_crash.csv"
 TAXI_ZONES_FILE_PATH = "data/raw/taxi_zones.csv"
 TAXI_TRIPS_TEMPLATE_FILE_PATH = "data/raw/taxi_trips_{}.parquet"
