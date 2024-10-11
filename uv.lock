@@ -1658,6 +1658,7 @@ dependencies = [
     { name = "scipy" },
     { name = "seaborn" },
     { name = "shapely" },
+    { name = "types-requests" },
 ]
 
 [package.optional-dependencies]
@@ -1691,6 +1692,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.14.1" },
     { name = "seaborn", specifier = ">=0.13.2" },
     { name = "shapely", specifier = ">=2.0.6" },
+    { name = "types-requests", specifier = ">=2.32.0.20240914" },
 ]
 
 [[package]]
@@ -3101,6 +3103,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/31/f8/f6ee4c803a7beccffee21bb29a71573b39f7037c224843eff53e5308c16e/types-python-dateutil-2.9.0.20241003.tar.gz", hash = "sha256:58cb85449b2a56d6684e41aeefb4c4280631246a0da1a719bdbe6f3fb0317446", size = 9210 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/35/d6/ba5f61958f358028f2e2ba1b8e225b8e263053bd57d3a79e2d2db64c807b/types_python_dateutil-2.9.0.20241003-py3-none-any.whl", hash = "sha256:250e1d8e80e7bbc3a6c99b907762711d1a1cdd00e978ad39cb5940f6f0a87f3d", size = 9693 },
+]
+
+[[package]]
+name = "types-requests"
+version = "2.32.0.20240914"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "urllib3" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9b/9e/aea33405c230cc3984c9f1065012d3a2003cef910730c367a0e91e7a4901/types-requests-2.32.0.20240914.tar.gz", hash = "sha256:2850e178db3919d9bf809e434eef65ba49d0e7e33ac92d588f4a5e295fffd405", size = 18030 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/8f/55/ea44dad71b9d92f86198f7448f5ba46ac919355f4f69bb1c0fa1af02b1b4/types_requests-2.32.0.20240914-py3-none-any.whl", hash = "sha256:59c2f673eb55f32a99b2894faf6020e1a9f4a402ad0f192bfee0b64469054310", size = 15838 },
 ]
 
 [[package]]
