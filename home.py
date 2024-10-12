@@ -3,7 +3,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 st.title("Interact and Visualize Vehicle Crash Data by MTA Open")
 
-from visualization.components import vehicles_crash_data  # noqa: E402
+from components import vehicles_crash_data  # noqa: E402
 
 st.write("# Initial Analysis")
 data_load_state = st.text("Downloading data...")
