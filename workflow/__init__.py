@@ -1,11 +1,9 @@
 # fmt: off
 from dagster import Definitions, load_assets_from_modules
 
-from .assets import metrics, trips
+from workflow.assets import crashes, metrics
 
-trip_assets = load_assets_from_modules([trips])
+crash_assets = load_assets_from_modules([crashes])
 metric_assets = load_assets_from_modules([metrics])
 
-defs = Definitions(
-    assets=[*trip_assets, *metric_assets]
-)
+defs = Definitions(assets=[*crash_assets, *metric_assets])
