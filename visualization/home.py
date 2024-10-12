@@ -6,9 +6,9 @@ st.title("Interact and Visualize Vehicle Crash Data by MTA Open")
 from visualization.components import vehicles_crash_data  # noqa: E402
 
 st.write("# Initial Analysis")
-data_load_state = st.text("Loading data...")
+data_load_state = st.text("Downloading data...")
 data = vehicles_crash_data()
-data_load_state.text("Loading data...done!")
+data_load_state.text("Downloading data...done!")
 
 if st.checkbox("Show raw data"):
     st.subheader("Sample data")

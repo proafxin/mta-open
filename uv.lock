@@ -1698,7 +1698,7 @@ wheels = [
 
 [[package]]
 name = "mta-open"
-version = "0.1.1"
+version = "0.2.1"
 source = { editable = "." }
 dependencies = [
     { name = "dagster" },
@@ -3245,11 +3245,11 @@ wheels = [
 
 [[package]]
 name = "trove-classifiers"
-version = "2024.10.11"
+version = "2024.10.12"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/a1/e5/5663cb67e695a5e7d6af6d7809194157be218a5432072f26d8fb04084d94/trove_classifiers-2024.10.11.tar.gz", hash = "sha256:4ce46e44b2c2eb86a7a073d825fffe99d445b4712d3ed6afb0a1ad001e81ff62", size = 16085 }
+sdist = { url = "https://files.pythonhosted.org/packages/e7/ee/c9a194b1f48dd4b91adb4ae6ced37d87f18ae9cc1d0d6ec23a0bebe4bafe/trove_classifiers-2024.10.12.tar.gz", hash = "sha256:52528e3ed81d05ad81773251938ec84cc553e2bba688683f2e44b1c5f565b363", size = 16100 }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/db/f0/0a650be35cfb7e38a394e32232908c4dc8a7dcc19686d745bc47ac025739/trove_classifiers-2024.10.11-py3-none-any.whl", hash = "sha256:8f628a5cead62d720dadc43f2aed9d48c923e27cb8a0e1c929fb25c5a932b719", size = 13499 },
+    { url = "https://files.pythonhosted.org/packages/79/c6/88ae146123950a07952605b514850b5d1d7ca297abcd723ffcbafea432d6/trove_classifiers-2024.10.12-py3-none-any.whl", hash = "sha256:e3f595bb8c64a0e9192aeefd3ece2a78606cc1fdb71c0a7d27ce2d1da357b30b", size = 13501 },
 ]
 
 [[package]]
