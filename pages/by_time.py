@@ -4,7 +4,7 @@ import polars as pl
 import streamlit as st
 from polars import DataFrame
 
-from components import vehicles_crash_data
+from ..home import vehicles_crash_data
 
 st.title("Crashes by time")
 
@@ -13,17 +13,23 @@ date_column = "date"
 time_column = "time"
 
 
-@st.cache_data
+@st.cache_resource
 def data_with_time() -> DataFrame:
     data = vehicles_crash_data()
-    data = data.with_columns(pl.col("crash_date").str.to_date(format="%m/%d/%Y").alias(date_column))
-    data = data.with_columns(pl.col("crash_time").str.to_time(format="%H:%M").alias(time_column))
+    data = data.with_columns(
+        pl.col("crash_date").str.to_date(format="%m/%d/%Y").alias(date_column)
+    )
+    data = data.with_columns(
+        pl.col("crash_time").str.to_time(format="%H:%M").alias(time_column)
+    )
 
-    return data.with_columns(
+    data = data.with_columns(
         pl.col(date_column).dt.month().alias("month"),
         pl.col(date_column).dt.year().alias("year"),
         pl.col(time_column).dt.hour().alias("hour"),
     )
+
+    return data
 
 
 data = data_with_time()

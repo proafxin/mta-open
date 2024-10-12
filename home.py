@@ -1,9 +1,33 @@
+import re
+
 import streamlit as st
+from polars import DataFrame, read_parquet
 
 st.set_page_config(layout="wide")
 st.title("Interact and Visualize Vehicle Crash Data by MTA Open")
 
-from components import vehicles_crash_data  # noqa: E402
+
+def sanitize(text: str, lower: bool = False) -> str:
+    if lower:
+        text = text.lower()
+
+    text = re.sub(r"[-. ]", "_", text)
+    pattern = r"[^a-zA-Z0-9_]"
+
+    return re.sub(pattern=pattern, string=text, repl="")
+
+
+@st.cache_resource
+def vehicles_crash_data() -> DataFrame:
+    # data = execute(query="select * from 'vehicle_crash'")
+    # data = read_csv(
+    #     "https://drive.usercontent.google.com/download?id=1cHOFJE6uZEjfsHUd3Q67xiyTCuCMPVhF&export=download&authuser=0&confirm=t&uuid=323fb3c5-7397-4e6d-a379-ea08496d1a5b&at=AN_67v2pE0AGSnWeASB8TBCTAaMT:1728737337209"
+    # )
+    data = read_parquet("data/vehicle_crash.parquet")
+    data.columns = [sanitize(column, lower=True) for column in data.columns]
+
+    return data
+
 
 st.write("# Initial Analysis")
 data_load_state = st.text("Downloading data...")
