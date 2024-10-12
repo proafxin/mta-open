@@ -11,7 +11,6 @@ if not STAGINGDIR.exists():
 
 DUCKDB_LOCATION = STAGINGDIR / "data.duckdb"
 VEHICLE_CRASH_FILENAME = "vehicle_crash.csv"
-MOTOR_VEHICLES_COLLISION_FILENAME = "motor_vehicles_collisions.csv"
 TAXI_ZONES_FILE_PATH = "data/raw/taxi_zones.csv"
 TAXI_TRIPS_TEMPLATE_FILE_PATH = "data/raw/taxi_trips_{}.parquet"
 
