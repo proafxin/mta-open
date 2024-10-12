@@ -4,8 +4,8 @@ import duckdb
 from dagster import asset
 from polars import read_csv
 
+from cleaner import sanitize
 from workflow.assets.constants import DATADIR, DUCKDB_LOCATION, OUTDIR, VEHICLE_CRASH_FILENAME
-from workflow.cleaner import sanitize
 
 PARQUET_FILE = ""
 

@@ -52,9 +52,15 @@ st.bar_chart(data=count_by_time(option=option), x=option, y="count", color=optio
 
 clean_data = clean_time_data()
 
+if st.checkbox("Show Map"):
+    st.subheader(f"Map by {option}")
+    time = st.slider(
+        option,
+        data.select(pl.min(option)).row(0)[0],
+        data.select(pl.max(option)).row(0)[0],
+        int(data.select(pl.median(option)).row(0)[0]),
+    )
+    filtered_data = clean_data.filter(pl.col(option).le(time))
 
-hour = st.slider("hour", 0, 23, 12)
-filtered_data = clean_data.filter(pl.col("hour").le(hour))
-
-st.subheader(f"Map of all crashes at hour: {hour}")
-st.map(filtered_data)
+    st.subheader(f"Map of all crashes at {option}: {time}")
+    st.map(filtered_data)
