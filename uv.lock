@@ -1698,7 +1698,7 @@ wheels = [
 
 [[package]]
 name = "mta-open"
-version = "0.1.0"
+version = "0.1.1"
 source = { editable = "." }
 dependencies = [
     { name = "dagster" },
@@ -1713,6 +1713,7 @@ dependencies = [
     { name = "plotly" },
     { name = "polars" },
     { name = "prometheus-client" },
+    { name = "pyarrow-stubs" },
     { name = "scikit-learn" },
     { name = "scipy" },
     { name = "seaborn" },
@@ -1748,6 +1749,7 @@ requires-dist = [
     { name = "polars", specifier = ">=1.8.2" },
     { name = "pre-commit", marker = "extra == 'dev'", specifier = ">=4.0.1" },
     { name = "prometheus-client", specifier = ">=0.21.0" },
+    { name = "pyarrow-stubs", specifier = ">=17.7" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3.3" },
     { name = "scikit-learn", specifier = ">=1.5.2" },
     { name = "scipy", specifier = ">=1.14.1" },
@@ -2356,6 +2358,18 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/f6/b0/b9164a8bc495083c10c281cc65064553ec87b7537d6f742a89d5953a2a3e/pyarrow-17.0.0-cp312-cp312-manylinux_2_28_aarch64.whl", hash = "sha256:9ba11c4f16976e89146781a83833df7f82077cdab7dc6232c897789343f7891a", size = 38715172 },
     { url = "https://files.pythonhosted.org/packages/f1/c4/9625418a1413005e486c006e56675334929fad864347c5ae7c1b2e7fe639/pyarrow-17.0.0-cp312-cp312-manylinux_2_28_x86_64.whl", hash = "sha256:b0c6ac301093b42d34410b187bba560b17c0330f64907bfa4f7f7f2444b0cf9b", size = 39874508 },
     { url = "https://files.pythonhosted.org/packages/ae/49/baafe2a964f663413be3bd1cf5c45ed98c5e42e804e2328e18f4570027c1/pyarrow-17.0.0-cp312-cp312-win_amd64.whl", hash = "sha256:392bc9feabc647338e6c89267635e111d71edad5fcffba204425a7c8d13610d7", size = 25099235 },
+]
+
+[[package]]
+name = "pyarrow-stubs"
+version = "17.7"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "pyarrow" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/66/cd/fd36b5c6e41d1142e586b4577ef92ca4d1ff462fc90d53f13ac881bd7d77/pyarrow_stubs-17.7.tar.gz", hash = "sha256:caf83fc7de100bf8a40cd79d097a8c28384aa0ef38e3a9a340d55cdf6f3d840c", size = 81697 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/ca/40/b9bbbccce8665e0ce5788f753a49377488e3689c6182a9e77604f5734439/pyarrow_stubs-17.7-py3-none-any.whl", hash = "sha256:ff47b22a1fdac24a8fda53b0f60d8cf4a9d14d0daf19f0bfca0681796f31be13", size = 78801 },
 ]
 
 [[package]]
