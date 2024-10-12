@@ -4,7 +4,7 @@ import polars as pl
 import streamlit as st
 from polars import DataFrame
 
-from visualization.components import vehicles_crash_data
+from components import vehicles_crash_data
 
 st.title("Crashes by time")
 
