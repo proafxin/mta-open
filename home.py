@@ -1,14 +1,15 @@
 import streamlit as st
 
+from component import vehicles_crash_data
+
 st.set_page_config(layout="wide")
 st.title("Interact and Visualize Vehicle Crash Data by MTA Open")
 
-from components import vehicles_crash_data  # noqa: E402
 
 st.write("# Initial Analysis")
-data_load_state = st.text("Downloading data...")
+data_load_state = st.text("Loading data...")
 data = vehicles_crash_data()
-data_load_state.text("Downloading data...done!")
+data_load_state.text("Loading data...done!")
 
 if st.checkbox("Show raw data"):
     st.subheader("Sample data")
