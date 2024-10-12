@@ -15,6 +15,7 @@ time_column = "time"
 data_original = vehicles_crash_data()
 
 
+@st.cache_resource
 def data_with_time() -> DataFrame:
     data = data_original.with_columns(
         pl.col("crash_date").str.to_date(format="%m/%d/%Y").alias(date_column)
