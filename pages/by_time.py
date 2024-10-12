@@ -4,7 +4,7 @@ import polars as pl
 import streamlit as st
 from polars import DataFrame
 
-from ..home import vehicles_crash_data
+from home import vehicles_crash_data
 
 st.title("Crashes by time")
 
@@ -68,4 +68,4 @@ if st.checkbox("Show Map"):
     )
     st.subheader(f"Map of all crashes at {option}: {time}")
     filtered_data = clean_data.filter(pl.col(option).le(time))
-    st.map(filtered_data)
+    st.map(filtered_data.select(["latitude", "longitude"]))
