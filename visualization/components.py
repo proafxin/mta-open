@@ -11,4 +11,10 @@ def execute(query: str) -> DataFrame:
         return conn.execute(query=query).pl()
 
 
-vehicles_data = execute(query="select * from 'vehicle_crash'")
+@st.cache_data
+def vehicles_crash_data() -> DataFrame:
+    data = execute(query="select * from 'vehicle_crash'")
+    return data
+
+
+event_type = "Event_Type"

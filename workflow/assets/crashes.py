@@ -16,7 +16,7 @@ def vehicle_crash_raw() -> None:
 
     file = DATADIR / VEHICLE_CRASH_FILENAME
     data = read_csv(file)
-    clean_columns = [sanitize(text=column) for column in data.columns]
+    clean_columns = [sanitize(text=column, lower=True) for column in data.columns]
     data.columns = clean_columns
     filename, _ = splitext(VEHICLE_CRASH_FILENAME)
     parquet_file = f"{filename}.parquet"
