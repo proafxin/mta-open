@@ -60,7 +60,6 @@ if st.checkbox("Show Map"):
         data.select(pl.max(option)).row(0)[0],
         int(data.select(pl.median(option)).row(0)[0]),
     )
-    filtered_data = clean_data.filter(pl.col(option).le(time))
-
     st.subheader(f"Map of all crashes at {option}: {time}")
+    filtered_data = clean_data.filter(pl.col(option).le(time))
     st.map(filtered_data)
