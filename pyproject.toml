@@ -1,53 +1,19 @@
-[project]
+[tool.poetry]
 name = "mta-open"
-description = "Data Analytics and Visualization Pipeline on MTA Open Vehicle Crash Dataset"
+version = "0.2.2"
+description = ""
+authors = ["Masum Billal <billalmasum93@gmail.com>"]
+license = "LICENSE"
 readme = "README.md"
-dynamic = ["version"]
-requires-python = ">=3.11"
-dependencies = [
-    "dagster-cloud>=1.8.11",
-    "dagster-duckdb>=0.24.11",
-    "dagster>=1.8.11",
-    "duckdb>=1.1.1",
-    "geopandas>=1.0.1",
-    "hatchling>=1.25.0",
-    "jupyter>=1.1.1",
-    "matplotlib>=3.9.2",
-    "numpy>=2.1.1",
-    "plotly>=5.24.1",
-    "polars>=1.8.2",
-    "prometheus-client>=0.21.0",
-    "pyarrow-stubs>=17.7",
-    "scikit-learn>=1.5.2",
-    "scipy>=1.14.1",
-    "seaborn>=0.13.2",
-    "shapely>=2.0.6",
-    "streamlit>=1.39.0",
-    "types-requests>=2.32.0.20240914",
-]
 
-[tool.hatch.version]
-path = "./mta_open/__init__.py"
+[tool.poetry.dependencies]
+python = ">=3.11,<3.13"
+duckdb = "^1.1.1"
+polars = "^1.9.0"
+streamlit = "^1.39.0"
+dagster = "^1.8.11"
 
-[project.optional-dependencies]
-dev = [
-    "coverage>=7.6.2",
-    "dagster-webserver>=1.8.11",
-    "mypy>=1.11.2",
-    "pre-commit>=4.0.1",
-    "pytest>=8.3.3",
-]
-
-[tool.dagster]
-module_name = "workflow"
 
 [build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
-[tool.ruff]
-line-length = 120
-
-[[tool.mypy.overrides]]
-module = ["geopandas", "plotly.*", "plotly"]
-ignore_missing_imports = true
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
