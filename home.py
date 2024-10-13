@@ -1,14 +1,19 @@
 import streamlit as st
+from polars import read_parquet
 
-from component import vehicles_crash_data
+from cleaner import sanitize
 
 st.set_page_config(layout="wide")
 st.title("Interact and Visualize Vehicle Crash Data by MTA Open")
-
-
 st.write("# Initial Analysis")
+
+
 data_load_state = st.text("Loading data...")
-data = vehicles_crash_data()
+with open("data/vehicle_crash.parquet", mode="rb") as f:
+    st.session_state["contents"] = f.read()
+
+data = read_parquet(st.session_state["contents"])
+data.columns = [sanitize(column, lower=True) for column in data.columns]
 data_load_state.text("Loading data...done!")
 
 if st.checkbox("Show raw data"):
