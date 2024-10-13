@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mta-open"
-version = "0.2.4"
+version = "0.2.5"
 description = ""
 authors = ["Masum Billal <billalmasum93@gmail.com>"]
 license = "LICENSE"
@@ -12,6 +12,7 @@ duckdb = "^1.1.1"
 polars = "^1.9.0"
 streamlit = "^1.39.0"
 dagster = "^1.8.11"
+plotly = "^5.24.1"
 
 
 [build-system]
