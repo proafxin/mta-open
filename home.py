@@ -1,19 +1,18 @@
 import streamlit as st
 from polars import read_parquet
 
-from cleaner import sanitize
-
 st.set_page_config(layout="wide")
 st.title("Interact and Visualize Vehicle Crash Data by MTA Open")
+
+"""
+#### Find data [here](https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95/about_data).
+"""
+
 st.write("# Initial Analysis")
 
 
 data_load_state = st.text("Loading data...")
-with open("data/vehicle_crash.parquet", mode="rb") as f:
-    st.session_state["contents"] = f.read()
-
-data = read_parquet(st.session_state["contents"])
-data.columns = [sanitize(column, lower=True) for column in data.columns]
+data = read_parquet("data/vehicle_crash.parquet")
 data_load_state.text("Loading data...done!")
 
 if st.checkbox("Show raw data"):
@@ -29,3 +28,4 @@ column = st.selectbox("Select a variable", count_columns)
 count_load_state = st.text(f"Count by {column}...")
 st.dataframe(data[column].value_counts())
 count_load_state.text(f"Count by `{column}` loaded.")
+del data
