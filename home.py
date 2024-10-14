@@ -39,5 +39,3 @@ fig = px.pie(
 )
 st.plotly_chart(fig, theme="streamlit", use_container_width=True)
 count_load_state.text(f"Count by `{column}` loaded.")
-
-del data
