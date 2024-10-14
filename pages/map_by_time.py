@@ -14,17 +14,13 @@ option = st.selectbox(label="Time to filter by", options=options)
 
 
 st.subheader(f"Map by {option}")
-time = st.slider(
-    option,
-    clean_data.select(pl.min(option)).row(0)[0],
-    clean_data.select(pl.max(option)).row(0)[0],
-    int(clean_data.select(pl.median(option)).row(0)[0]),
-)
-map_state = st.subheader(f"Loading crashes at {option}: {time}...")
-filtered_data = clean_data.filter(pl.col(option).eq(time))
+minimum = int(clean_data[option].min())  # type: ignore [arg-type]
+maximum = int(clean_data[option].max())  # type: ignore [arg-type]
+start_time, end_time = st.slider(option.upper(), minimum, maximum, (minimum, int(clean_data[option].median())))  # type: ignore [arg-type]
+map_state = st.subheader(f"Loading crashes at {option} from {start_time} to {end_time}...")
+filtered_data = clean_data.filter(pl.col(option).le(end_time))
+filtered_data = filtered_data.filter(pl.col(option).ge(start_time))
 
 st.map(filtered_data.select(["latitude", "longitude"]))
-del clean_data
-del filtered_data
 
-map_state.subheader(f"Loaded crashes at {option}: {time}!")
+map_state.subheader(f"Loaded crashes at {option} from {start_time} to {end_time}!")
