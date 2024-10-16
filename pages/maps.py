@@ -50,16 +50,19 @@ color_map = {borough: color for borough, color in zip(boroughs, COLOUR_RANGE)}
 # calculate colour range mapping index to then assign fill colour
 chart_data["color"] = chart_data["borough"].map(lambda x: color_map[x])
 
+map_state = st.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...")  # type: ignore [str-bytes-safe]
+
 view_state = pydeck.ViewState(
     latitude=filtered_data["latitude"].mean(), longitude=filtered_data["longitude"].mean(), zoom=9.5
 )
 
 layer = pydeck.Layer(
-    "ScatterplotLayer", data=chart_data, get_position="[lon, lat]", get_color="color", pickable=True, get_radius=200
+    "ScatterplotLayer", data=chart_data, get_position="[lon, lat]", get_color="color", pickable=True, get_radius=100
 )
 
-map_state = st.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...")  # type: ignore [str-bytes-safe]
+deck = pydeck.Deck(initial_view_state=view_state, layers=[layer], map_provider="mapbox")
 
-st.pydeck_chart(pydeck.Deck(initial_view_state=view_state, layers=[layer], map_provider="mapbox"))
+
+st.pydeck_chart(deck)
 
 map_state.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...DONE!")  # type: ignore [str-bytes-safe]
