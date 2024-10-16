@@ -16,12 +16,15 @@ plotly = "^5.24.1"
 jupyter = "^1.1.1"
 pydeck = "^0.9.1"
 geopy = "^2.4.1"
+scipy = "^1.14.1"
+streamlit-folium = "^0.23.1"
+pandas-stubs = "^2.2.3.241009"
 
 [tool.ruff]
 line-length = 120
 
 [[tool.mypy.overrides]]
-module = ["geopandas", "plotly.*", "plotly, pydeck"]
+module = ["geopandas", "plotly.*", "plotly", "pydeck"]
 ignore_missing_imports = true
 
 [build-system]
