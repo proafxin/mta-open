@@ -2,7 +2,7 @@ import altair
 import streamlit as st
 from polars import read_parquet
 
-st.set_page_config(layout="wide")
+# st.set_page_config(layout="wide")
 st.title("Interactive Visualization of New York Motor Vehicles Crash Open Data")
 
 """
@@ -17,8 +17,11 @@ if st.checkbox("Show raw data"):
     st.subheader("Sample data")
     st.dataframe(data.head())
 
+columns = data.columns
+
+
 st.subheader("Number of crashes based on factors")
-count_columns = data.columns[2:3] + data.columns[10:-6]
+count_columns = columns[2:3] + columns[10:-6]
 column = st.selectbox("Variable", count_columns)
 value_counts = data[column].drop_nulls().value_counts(sort=True)
 chart = altair.Chart(value_counts).mark_circle().encode(x=column, y="count", size="count", color=column)
