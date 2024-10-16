@@ -1,8 +1,6 @@
 from datetime import date
 
-import pandas as pd
 import polars as pl
-import pydeck
 import streamlit as st
 
 st.set_page_config(layout="wide")
@@ -16,10 +14,8 @@ clean_data = pl.read_parquet("data/clean_map.parquet")
 data_load_state.text("Loading data...done!")
 
 
-# option = st.selectbox(label="Filter by", options=options)
-
 option = "date"
-st.subheader(f"Map by {option}")
+st.subheader(f"{option.capitalize()} range")
 minimum = clean_data[option].min()  # type: ignore [arg-type]
 maximum = clean_data[option].max()  # type: ignore [arg-type]
 median = clean_data[option].median()
@@ -39,30 +35,33 @@ filtered_data = filtered_data.filter(pl.col(option).le(end_time))
 filtered_data = filtered_data.filter(pl.col(option).ge(start_time))
 
 
-chart_data = pd.DataFrame(
-    filtered_data.select(["latitude", "longitude", "borough"]).to_numpy(), columns=["lat", "lon", "borough"]
-)
+# chart_data = pd.DataFrame(
+#     filtered_data.select(["latitude", "longitude", "borough"]).to_numpy(), columns=["lat", "lon", "borough"]
+# )
 
 COLOUR_RANGE = [[217, 20, 122, 200], [235, 100, 33, 200], [14, 166, 204, 200], [131, 28, 161, 200], [100, 10, 225, 220]]
 
-boroughs = filtered_data["borough"].unique().to_list()
-color_map = {borough: color for borough, color in zip(boroughs, COLOUR_RANGE)}
+COLORS = ["#0044ff", "#ffaa00", "#00ff00", "#ff7f0e", "#2ca02c"]
+
+color_map = {borough: color for borough, color in zip(boroughs, COLORS)}
 # calculate colour range mapping index to then assign fill colour
-chart_data["color"] = chart_data["borough"].map(lambda x: color_map[x])
+# chart_data["color"] = chart_data["borough"].map(lambda x: color_map[x])
+
+filtered_data = filtered_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
 
 map_state = st.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...")  # type: ignore [str-bytes-safe]
 
-view_state = pydeck.ViewState(
-    latitude=filtered_data["latitude"].mean(), longitude=filtered_data["longitude"].mean(), zoom=9.5
-)
+st.map(data=filtered_data, latitude="latitude", longitude="longitude", color="color", height=750)
 
-layer = pydeck.Layer(
-    "ScatterplotLayer", data=chart_data, get_position="[lon, lat]", get_color="color", pickable=True, get_radius=100
-)
+# view_state = pydeck.ViewState(
+#     latitude=filtered_data["latitude"].mean(), longitude=filtered_data["longitude"].mean(), zoom=9.5
+# )
 
-deck = pydeck.Deck(initial_view_state=view_state, layers=[layer], map_provider="mapbox")
+# layer = pydeck.Layer(
+#     "ScatterplotLayer", data=chart_data, get_position="[lon, lat]", get_color="color", pickable=True, get_radius=100
+# )
 
-
-st.pydeck_chart(deck)
+# deck = pydeck.Deck(initial_view_state=view_state, layers=[layer], map_provider="mapbox")
+# st.pydeck_chart(deck)
 
 map_state.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...DONE!")  # type: ignore [str-bytes-safe]
