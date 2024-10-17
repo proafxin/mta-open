@@ -87,23 +87,6 @@ with col[0]:
         "* Locations are sometimes inaccurate. For example, there are coordinates with (0,0) values. These are considered **invalid**."
     )
 
-    st.subheader("Navigation")
-    with st.container():
-        st.page_link(
-            page="pages/2_Charts_and_Statistics.py",
-            label="Visualize charts and get insights from statistics",
-            icon="📊",
-        )
-
-    with st.container():
-        st.page_link(page="pages/1_Data_Exploration.py", label="Explore data", icon="🌍")
-
-    with st.container():
-        st.page_link(page="pages/4_Maps.py", label="Generate heatmaps", icon="🔥")
-
-    with st.container():
-        st.page_link(page="pages/3_Timeseries_Charts.py", label="Get timeseries charts", icon="📈")
-
 
 with col[1]:
     subcols = st.columns((0.3, 0.3, 0.3), gap="small")
