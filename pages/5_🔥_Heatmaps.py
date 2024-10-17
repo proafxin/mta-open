@@ -9,8 +9,14 @@ st.set_page_config(layout="wide")
 st.title("Map of incidents")
 
 
+@st.cache_resource
+def load_data() -> pl.DataFrame:
+    return pl.read_parquet("data/clean_map.parquet")
+
+
+clean_data = load_data()
+
 data_load_state = st.text("Loading data...")
-clean_data = pl.read_parquet("data/clean_map.parquet")
 data_load_state.text("Loading data...done!")
 
 
