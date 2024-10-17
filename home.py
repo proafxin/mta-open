@@ -78,45 +78,37 @@ with col[0]:
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
     st.markdown(
-        "* General principle: when considering a certain factor, all the points missing values for that factor are discarded."
+        "* Null values are not considered e.g. if location is not present, the row is not considered for map plotting."
     )
-    st.markdown("* Example: if location is not present, the point is not considered for map plotting.")
+    st.markdown(
+        "* Obviously, context matters. Not all columns are considered for null filtering. Street names and contributing factors can often be left empty."
+    )
     st.markdown(
         "* Locations are sometimes inaccurate. For example, there are coordinates with (0,0) values. These are considered **invalid**."
     )
 
-    st.subheader("Navigation")
-    with st.container():
-        st.page_link(
-            page="pages/2_Charts_and_Statistics.py",
-            label="Visualize charts and get insights from statistics",
-            icon="📊",
-        )
-
-    with st.container():
-        st.page_link(page="pages/1_Data_Exploration.py", label="Explore data", icon="🌍")
-
-    with st.container():
-        st.page_link(page="pages/4_Maps.py", label="Generate heatmaps", icon="🔥")
-
-    with st.container():
-        st.page_link(page="pages/3_Timeseries_Charts.py", label="Get timeseries charts", icon="📈")
-
 
 with col[1]:
-    subcols = st.columns((0.5, 0.5), gap="small")
+    subcols = st.columns((0.3, 0.3, 0.3), gap="small")
     with subcols[0]:
         st.header("Metadata")
         st.metric("Total number of crashes", data.shape[0])
-        marked = data["borough"].drop_nulls().shape[0]
-        st.metric("Location marked", marked)
-        st.metric("Location unmarked", data.shape[0] - marked)
-        invalid = read_parquet("data/invalid_coordinate.parquet")
-        st.metric("Valid Locations", value=marked - invalid.shape[0])
-        st.metric("Invalid locations", invalid.shape[0])
+        st.metric(
+            "Number of crashes with time and location",
+            data.select(["date", "borough", "time", "latitude", "longitude"]).drop_nulls().shape[0],
+        )
 
     with subcols[1]:
+        st.header("Location marking")
+        marked = data.drop_nulls(subset=["latitude"])
+        marked = marked.drop_nulls(subset=["longitude"])
+        st.metric("Locations marked", marked.shape[0])
+        st.metric("Locations unmarked", data.shape[0] - marked.shape[0])
+        invalid = read_parquet("data/invalid_coordinate.parquet")
+        st.metric("Valid markings", value=marked.shape[0] - invalid.shape[0])
+        st.metric("Invalid markings", invalid.shape[0])
+
+    with subcols[2]:
         st.header("Victims")
         st.metric("Total killed", data["number_of_persons_killed"].sum())
         st.metric("Total injured", data["number_of_persons_injured"].sum())
-        st.header("Safety")

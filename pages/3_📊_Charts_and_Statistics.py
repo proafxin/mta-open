@@ -43,6 +43,9 @@ st.title("Statistics and Charts")
 #             st.metric(label="Injured", value=filtered["number_of_persons_injured"].sum())
 
 
+""
+
+
 COLUMN_VALUES = {
     "year": range(2012, 2025),
     "borough": ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"],
