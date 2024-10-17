@@ -7,7 +7,14 @@ from common import options  # noqa: E402
 
 st.title("Range queries by time")
 
-data_time = pl.read_parquet("data/time_only.parquet")
+
+@st.cache_resource
+def load_data() -> pl.DataFrame:
+    return pl.read_parquet("data/time_only.parquet")
+
+
+data_time = load_data()
+
 ""
 st.subheader("Number of crashes in New York within date range")
 ""

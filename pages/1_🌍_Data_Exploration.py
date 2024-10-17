@@ -8,11 +8,9 @@ st.subheader("10 Random Data Points for Different Scenarios")
 
 
 with st.expander("Raw Data"):
-    data = read_parquet("data/vehicle_crash.parquet")
+    data = read_parquet("data/random.parquet")
     st.dataframe(data.sample(n=10))
 
-with st.expander("Check Data Types"):
-    st.dataframe(data=[data.schema])
 
 ""
 ""

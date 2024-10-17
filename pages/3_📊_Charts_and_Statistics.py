@@ -4,7 +4,13 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
-data = pl.read_parquet("data/processed.parquet")
+
+@st.cache_resource
+def load_data() -> pl.DataFrame:
+    return pl.read_parquet("data/processed.parquet")
+
+
+data = load_data()
 columns = data.columns
 st.title("Statistics and Charts")
 
