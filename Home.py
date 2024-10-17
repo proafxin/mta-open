@@ -2,8 +2,8 @@ import altair
 import streamlit as st
 from polars import read_parquet
 
-st.set_page_config(page_title="12 Years of NY Motor Crash ", layout="wide")
-st.title("New York Motor Vehicles Crash Data Insights")
+st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
+st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations")
 ""
 ""
 
@@ -88,17 +88,19 @@ with col[0]:
     st.subheader("Navigation")
     with st.container():
         st.page_link(
-            page="pages/Charts_and_Statistics.py", label="Visualize charts and get insights from statistics", icon="📊"
+            page="pages/2_Charts_and_Statistics.py",
+            label="Visualize charts and get insights from statistics",
+            icon="📊",
         )
 
     with st.container():
-        st.page_link(page="pages/Data_Exploration.py", label="Explore data", icon="ℹ️")
+        st.page_link(page="pages/1_Data_Exploration.py", label="Explore data", icon="🌍")
 
     with st.container():
-        st.page_link(page="pages/Maps.py", label="Generate heatmaps", icon="🌍")
+        st.page_link(page="pages/4_Maps.py", label="Generate heatmaps", icon="🔥")
 
     with st.container():
-        st.page_link(page="pages/Timeseries_Charts.py", label="Get timeseries charts", icon="📈")
+        st.page_link(page="pages/3_Timeseries_Charts.py", label="Get timeseries charts", icon="📈")
 
 
 with col[1]:
@@ -117,3 +119,4 @@ with col[1]:
         st.header("Victims")
         st.metric("Total killed", data["number_of_persons_killed"].sum())
         st.metric("Total injured", data["number_of_persons_injured"].sum())
+        st.header("Safety")
