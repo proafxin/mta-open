@@ -11,6 +11,9 @@ with st.expander("Raw Data"):
     data = read_parquet("data/vehicle_crash.parquet")
     st.dataframe(data.sample(n=10))
 
+with st.expander("Check Data Types"):
+    st.dataframe(data=[data.schema])
+
 ""
 ""
 columns = st.columns((0.7, 0.4, 0.3), gap="small")
