@@ -28,7 +28,7 @@ value = (clean_data[option].dt.min(), median)
 
 start_time, end_time = st.slider(option.upper(), minimum, maximum, value)  # type: ignore [arg-type, type-var]
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
-selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:2])
+selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
 
 filtered_data = clean_data.filter(pl.col("borough").is_in(selected_boroughs))
 filtered_data = filtered_data.filter(pl.col(option).le(end_time))
