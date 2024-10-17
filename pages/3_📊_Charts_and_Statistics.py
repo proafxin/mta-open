@@ -56,7 +56,7 @@ COLUMN_VALUES = {
     "year": range(2012, 2025),
     "borough": ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"],
     "month": range(1, 13),
-    "hour": range(0, 23),
+    "hour": range(0, 24),
 }
 
 st.header("Statistics by Multiple Criteria")
@@ -99,22 +99,21 @@ def load_stats(keys: list[str]) -> pl.DataFrame:
 keys = list(inputs.keys())
 if len(keys) > 0:
     stats = load_stats(keys=keys)
-    st.dataframe(stats.head())
 
-    subcols = st.columns((1, 1, 1), gap="small")
-    filtered = data.filter(pl.col(keys[0]).eq(inputs[keys[0]]))
+    filtered = stats.filter(pl.col(keys[0]).eq(inputs[keys[0]]))
 
     for key in keys[1:]:
         filtered = filtered.filter(pl.col(key).eq(inputs[key]))
 
-    with subcols[0]:
-        st.metric(label="Crashes", value=filtered.shape[0])
+    metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "total_damage", "count"]
+    metric_cols = sorted(metric_cols)
+    for row in filtered.to_dicts():
+        subcols = st.columns((1,) * len(metric_cols), gap="small")
 
-    with subcols[1]:
-        st.metric(label="Dead", value=filtered["number_of_persons_killed"].sum())
+        for i, col in enumerate(metric_cols):
+            with subcols[i]:
+                st.metric(" ".join(col.split("_")).capitalize(), row[col])
 
-    with subcols[2]:
-        st.metric(label="Injured", value=filtered["number_of_persons_injured"].sum())
 
 st.header("Charts by a specific criteria")
 

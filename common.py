@@ -29,6 +29,8 @@ def persist_data_bitmask(data: pl.DataFrame, by: list[str], on: list[str]) -> No
             if (i & (1 << j)) != 0:
                 keys.append(by[j])
 
-        grouped = data.drop_nulls(subset=by).group_by(keys).agg(pl.col(on).sum())
+        grouped = (
+            data.drop_nulls(subset=keys).group_by(keys).agg(pl.col(on).sum(), pl.col(on[0]).count().alias("count"))
+        )
 
         grouped.write_parquet(form_filename(keys=keys, on=on))
