@@ -82,8 +82,25 @@ for i, column in enumerate(selectable_columns):
             inputs.pop(column)
 
 
+def form_filename(keys: list[str], on: list[str]) -> str:
+    filename = "__".join(sorted(keys))
+    filename = f"data/{filename}.parquet"
+
+    return filename
+
+
+@st.cache_resource
+def load_stats(keys: list[str]) -> pl.DataFrame:
+    filename = form_filename(keys=keys, on=["number_of_persons_killed", "number_of_persons_injured", "total_damage"])
+
+    return pl.read_parquet(filename)
+
+
 keys = list(inputs.keys())
 if len(keys) > 0:
+    stats = load_stats(keys=keys)
+    st.dataframe(stats.head())
+
     subcols = st.columns((1, 1, 1), gap="small")
     filtered = data.filter(pl.col(keys[0]).eq(inputs[keys[0]]))
 
