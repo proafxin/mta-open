@@ -42,7 +42,6 @@ st.title("Statistics and Charts")
 #         with subcols[2]:
 #             st.metric(label="Injured", value=filtered["number_of_persons_injured"].sum())
 
-selectable_columns = ["year", "borough", "month", "hour"]
 
 COLUMN_VALUES = {
     "year": range(2012, 2025),
@@ -58,15 +57,20 @@ filtered = pl.DataFrame()
 
 inputs = {}
 
-for column in selectable_columns:
-    select = st.checkbox(label=f"Choose {column}?")
+selectable_columns = list(COLUMN_VALUES.keys())
+cols = st.columns((1,) * len(selectable_columns))
 
-    if select:
-        criteria = st.selectbox(label=f"Select {column}", options=COLUMN_VALUES[column])  # type: ignore [var-annotated]
-        inputs[column] = criteria
 
-    elif column in inputs:
-        inputs.pop(column)
+for i, column in enumerate(selectable_columns):
+    with cols[i]:
+        select = st.checkbox(label=f"Choose {column}?")
+
+        if select:
+            criteria = st.selectbox(label=f"Select {column}", options=COLUMN_VALUES[column])  # type: ignore [var-annotated]
+            inputs[column] = criteria
+
+        elif column in inputs:
+            inputs.pop(column)
 
 
 keys = list(inputs.keys())

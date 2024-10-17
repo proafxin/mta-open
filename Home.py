@@ -9,12 +9,13 @@ st.title("New York Motor Vehicles Crash Data Insights")
 
 data = read_parquet("data/processed.parquet")
 url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95/about_data"
-markdown = f"Find details about the dataset [here]({url}). "
-markdown += f"Data spans from {data['date'].min()} to {data['date'].max()}."  # type: ignore[str-bytes-safe]
+st.link_button("Find details about the dataset here", url=url)
+markdown = f"Data spans from {data['date'].min()} to {data['date'].max()}."  # type: ignore[str-bytes-safe]
 st.markdown(markdown)
 
 ""
 altair.themes.enable("dark")
+
 
 #######################
 # CSS styling
@@ -83,6 +84,21 @@ with col[0]:
     st.markdown(
         "* Locations are sometimes inaccurate. For example, there are coordinates with (0,0) values. These are considered **invalid**."
     )
+
+    st.subheader("Navigation")
+    with st.container():
+        st.page_link(
+            page="pages/Charts_and_Statistics.py", label="Visualize charts and get insights from statistics", icon="📊"
+        )
+
+    with st.container():
+        st.page_link(page="pages/Data_Exploration.py", label="Explore data", icon="ℹ️")
+
+    with st.container():
+        st.page_link(page="pages/Maps.py", label="Generate heatmaps", icon="🌍")
+
+    with st.container():
+        st.page_link(page="pages/Timeseries_Charts.py", label="Get timeseries charts", icon="📈")
 
 
 with col[1]:
