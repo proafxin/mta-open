@@ -4,13 +4,8 @@ import altair
 import polars as pl
 import streamlit as st
 
-from common import MAXIMUMS, MINIMUMS
-
 st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
-st.markdown(
-    "<h1 style='text-align: center;'>12 Years of New York Motor Vehicles Crash: Insights and Visualizations</h1>",
-    unsafe_allow_html=True,
-)
+st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations")
 
 with open("data/metrics.json", mode="r") as f:
     metric = json.load(f)
@@ -21,19 +16,16 @@ url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Cras
 altair.themes.enable("dark")
 
 
-col = st.columns((1, 0.5, 1), gap="small")
+col = st.columns((0.8, 1.5, 1), gap="small")
 
 
 def write_metric(label: str):
     st.metric(label=label, value=metric[label])
 
 
-with col[0]:
-    st.link_button("Find details about the dataset here", url=url)
-    markdown = f"Data spans from {MINIMUMS['date']} to {MAXIMUMS['date']}."  # type: ignore[str-bytes-safe]
-    st.markdown(markdown)
-
-    st.markdown("<h2 style='text-align: center;'>Data Cleaning Policy</h2>", unsafe_allow_html=True)
+with st.sidebar:
+    st.link_button("About Dataset", url=url)
+    st.subheader("Data Cleaning policy")
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
     st.markdown(
@@ -60,11 +52,14 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict]:
+def calculate_metrics() -> tuple[dict, dict, dict[str, pl.DataFrame]]:
     metrics: dict[str | int, dict] = {}
     total: dict[str, dict[str, int | float]] = {}
+    correlations: dict[str, pl.DataFrame] = {}
     for column in by:
         data = load_metric(column=column)
+        corr = data.drop([column, "total_damage"]).corr()
+        correlations[column] = corr
         total[column] = {}
         for status in data.columns[1:]:
             total[column][status] = int(data[status].sum()) / data[column].shape[0]
@@ -73,10 +68,10 @@ def calculate_metrics() -> tuple[dict, dict]:
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, total
+    return metrics, total, correlations
 
 
-metrics, averages = calculate_metrics()
+metrics, averages, correlations = calculate_metrics()
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 years = range(2012, 2025)
@@ -84,7 +79,7 @@ years = range(2012, 2025)
 OPTIONS = {"borough": boroughs, "year": years}
 
 
-with col[1]:
+with col[0]:
     subcols = st.columns((1, 1), gap="small")
     with subcols[0]:
         write_metric("Total number of crashes")
@@ -99,7 +94,8 @@ with col[1]:
         write_metric("Valid markings")
         write_metric("Invalid markings")
 
-with col[2]:
+
+with col[1]:
     for column in by:
         selected = st.selectbox(label=f"By {column}", options=OPTIONS[column])
         keys = list(averages["borough"].keys())
@@ -110,4 +106,17 @@ with col[2]:
                 value = metrics[selected][key]
                 delta = value - averages[column][key]
                 delta = round(delta, 2)
-                st.metric(label=" ".join(str(key).capitalize().split("_")), value=value, delta=delta)
+                st.metric(
+                    label=" ".join(str(key).capitalize().split("_")), value=value, delta=delta, delta_color="inverse"
+                )
+
+with col[2]:
+    for column in by:
+        st.subheader(f"Correlation by {column}")
+        corr = correlations[column]
+        columns = list(corr.columns)
+        corr = corr.rename({col: col.split("_")[-1].capitalize() for col in columns})
+        columns = corr.columns
+        # corr.insert_column(0, pl.Series(columns))
+        corr_new = pl.DataFrame({"column": columns})
+        st.write(pl.concat([corr_new, corr], how="horizontal"))
