@@ -1,5 +1,6 @@
 from enum import Enum
 
+import altair
 import polars as pl
 import streamlit as st
 
@@ -44,13 +45,46 @@ class ReportType(str, Enum):
     FILE_DOWNLOAD = "Download full data"
 
 
+class VisualizationType(str, Enum):
+    LINE = "Line"
+    POINT = "Point"
+    AREA = "Area"
+    CIRCLE = "Circle"
+    BAR = "Bar"
+
+
 ""
 
 reporting = st.selectbox(
     label="Output type", options=[ReportType.CHART.value, ReportType.DATAFRAME.value, ReportType.FILE_DOWNLOAD.value]
 )
 if reporting == ReportType.CHART.value:
-    st.line_chart(data=data, x=option, y=COLUMNS[column], color="borough")
+    visualization = st.selectbox(
+        label="Visualize data as",
+        options=[
+            VisualizationType.LINE.value,
+            VisualizationType.POINT.value,
+            VisualizationType.BAR.value,
+            VisualizationType.CIRCLE.value,
+            VisualizationType.AREA.value,
+        ],
+    )
+    if visualization == VisualizationType.LINE.value:
+        st.line_chart(data=data, x=option, y=COLUMNS[column], color="borough")
+    elif visualization == VisualizationType.AREA.value:
+        st.area_chart(data=data, x=option, y=COLUMNS[column], color="borough")
+    elif visualization == VisualizationType.BAR.value:
+        st.bar_chart(data=data, x=option, y=COLUMNS[column], color="borough")
+    elif visualization == VisualizationType.CIRCLE.value:
+        st.scatter_chart(data=data, x=option, y=COLUMNS[column], color="borough", size=COLUMNS[column])
+    else:
+        chart = (
+            altair.Chart(data=data)
+            .mark_point()
+            .encode(x=option, y=COLUMNS[column], color="borough", size=COLUMNS[column])
+        ).interactive()
+        st.altair_chart(chart, use_container_width=True)
+
 elif reporting == ReportType.DATAFRAME.value:
     max_rows = 1000
     n_rows = st.number_input(label="Number of rows", min_value=1, max_value=max_rows, value=10)
