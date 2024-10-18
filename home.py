@@ -97,8 +97,6 @@ OPTIONS = {"borough": boroughs, "year": years}
 def draw_correlation(column: str) -> None:
     st.subheader(f"Correlation between incidents by {column}")
     corr = correlations[column]
-    # corr.style.background_gradient(cmap="gradient")
-
     fig = px.imshow(corr, text_auto=True, aspect="auto")
     st.plotly_chart(fig, theme="streamlit")
 
@@ -123,7 +121,7 @@ with st.container():
         for column in by:
             selected = st.selectbox(label=f"By {column}", options=OPTIONS[column])
             keys = list(averages["borough"].keys())
-            subcols = st.columns((1,) * len(keys), gap="small")
+            subcols = st.columns((1,) * (len(keys) + 1), gap="small")
 
             for i, key in enumerate(keys):
                 with subcols[i]:
@@ -136,6 +134,13 @@ with st.container():
                         delta=delta,
                         delta_color="inverse",
                     )
+            with subcols[-1]:
+                st.download_button(
+                    label=f"Correlation data for {column}s",
+                    data=correlations[column].to_csv(),
+                    mime="text/csv",
+                    file_name=f"correlation_{column}.csv",
+                )
 
     with col[2]:
         draw_correlation(column="borough")
@@ -144,4 +149,9 @@ with st.container():
 with st.container():
     st.subheader("Crashes and damage over the years")
     chart = px.line(cumulatives["year"], x="year", y=["number_of_persons_killed", "number_of_persons_injured", "count"])
+    chart2 = px.line(
+        cumulatives["borough"], x="borough", y=["number_of_persons_killed", "number_of_persons_injured", "count"]
+    )
     st.plotly_chart(chart)
+    st.subheader("Crashes and damage by boroughs")
+    st.plotly_chart(chart2)
