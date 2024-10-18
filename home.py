@@ -1,6 +1,7 @@
 import json
 
 import altair
+import pandas as pd
 import polars as pl
 import streamlit as st
 
@@ -52,14 +53,23 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict, dict[str, pl.DataFrame]]:
+def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame]]:
     metrics: dict[str | int, dict] = {}
     total: dict[str, dict[str, int | float]] = {}
     correlations: dict[str, pl.DataFrame] = {}
+    cumulatives: dict[str, pl.DataFrame] = {}
     for column in by:
         data = load_metric(column=column)
-        corr = data.drop([column, "total_damage"]).corr()
-        correlations[column] = corr
+
+        cumulatives[column] = data.select(
+            pl.col(column),
+            pl.col("number_of_persons_killed").cum_sum(),
+            pl.col("number_of_persons_injured"),
+            pl.col("count").cum_sum(),
+        )
+        df_pandas = data.drop([column, "total_damage"]).to_pandas()
+        df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
+        correlations[column] = df_pandas.corr()  # type: ignore [assignment]
         total[column] = {}
         for status in data.columns[1:]:
             total[column][status] = int(data[status].sum()) / data[column].shape[0]
@@ -68,7 +78,7 @@ def calculate_metrics() -> tuple[dict, dict, dict[str, pl.DataFrame]]:
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, total, correlations
+    return metrics, total, correlations  # type: ignore
 
 
 metrics, averages, correlations = calculate_metrics()
@@ -113,10 +123,4 @@ with col[1]:
 with col[2]:
     for column in by:
         st.subheader(f"Correlation by {column}")
-        corr = correlations[column]
-        columns = list(corr.columns)
-        corr = corr.rename({col: col.split("_")[-1].capitalize() for col in columns})
-        columns = corr.columns
-        # corr.insert_column(0, pl.Series(columns))
-        corr_new = pl.DataFrame({"column": columns})
-        st.write(pl.concat([corr_new, corr], how="horizontal"))
+        st.write(correlations[column])
