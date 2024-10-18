@@ -45,23 +45,24 @@ minimum = date(day=1, month=7, year=2012)
 maximum = date(day=8, month=10, year=2024)
 median = date(day=1, month=7, year=2014)
 
-value = (clean_data[option].dt.min(), median)
 
-
-start_time, end_time = st.slider(option.upper(), minimum, maximum, value)  # type: ignore [arg-type, type-var]
+time = st.slider(option.upper(), minimum, maximum, value=median)  # type: ignore [arg-type, type-var]
 selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
-map_state = st.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...")  # type: ignore [str-bytes-safe]
+map_state = st.text(f"Loading map of crashes by {option} = {time}...")  # type: ignore [str-bytes-safe]
 
 data = []
 for col in selected_boroughs:
     filtered_data = load_map_data(col=col)
-    filtered_data = filtered_data.filter(pl.col(option).le(end_time))
-    filtered_data = filtered_data.filter(pl.col(option).ge(start_time))
+    filtered_data = filtered_data.filter(pl.col(option).eq(time))
     filtered_data = filtered_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
     data.append(filtered_data)
 
 with st.container():
-    st.map(data=pl.concat(data), latitude="latitude", longitude="longitude", color="color", height=750)
+    map_data = pl.concat(data)
+    if map_data.shape[0] == 0:
+        st.info(f"No data found for {selected_boroughs} on {time}")
+    else:
+        st.map(data=map_data, latitude="latitude", longitude="longitude", color="color", height=750)
 
 # st.map(data=filtered_data, latitude="latitude", longitude="longitude", color="color", height=750)
-map_state.text(f"Loading map of crashes by {option} from {start_time} to {end_time}...DONE!")  # type: ignore [str-bytes-safe]
+map_state.text(f"Loading map of crashes by {option} = {time}...DONE!")  # type: ignore [str-bytes-safe]
