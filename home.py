@@ -133,5 +133,5 @@ with st.container():
             corr = correlations[column]
             # corr.style.background_gradient(cmap="gradient")
 
-            fig = px.imshow(corr, text_auto=True)
+            fig = px.imshow(corr, text_auto=True, aspect="auto")
             st.plotly_chart(fig, theme="streamlit")
