@@ -52,9 +52,6 @@ with st.container():
         st.info(f"No data found for {selected_boroughs} on {time}")
     else:
         st.map(data=map_data, latitude="latitude", longitude="longitude", color="color", height=750)
-        # fig = px.scatter_geo(map_data, lat="latitude", lon="longitude")
-        # st.plotly_chart(fig)
 
 
-# st.map(data=filtered_data, latitude="latitude", longitude="longitude", color="color", height=750)
 map_state.text(f"Loading map of crashes by {option} = {time}...DONE!")  # type: ignore [str-bytes-safe]

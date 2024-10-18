@@ -31,6 +31,11 @@ def write_metric(label: str):
 
 with st.sidebar:
     st.link_button("About Dataset", url=url)
+    templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
+    choose_template = st.checkbox("Choose template?")
+    template = None
+    if choose_template:
+        template = st.selectbox(label="Template", options=templates)
     st.subheader("Data Cleaning policy")
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
@@ -97,7 +102,7 @@ OPTIONS = {"borough": boroughs, "year": years}
 def draw_correlation(column: str) -> None:
     st.subheader(f"Correlation between incidents by {column}")
     corr = correlations[column]
-    fig = px.imshow(corr, text_auto=True, aspect="auto")
+    fig = px.imshow(corr, text_auto=True, aspect="auto", template=template)
     st.plotly_chart(fig, theme="streamlit")
 
 
@@ -148,10 +153,9 @@ with st.container():
 
 with st.container():
     st.subheader("Crashes and damage over the years")
-    chart = px.line(cumulatives["year"], x="year", y=["number_of_persons_killed", "number_of_persons_injured", "count"])
-    chart2 = px.line(
-        cumulatives["borough"], x="borough", y=["number_of_persons_killed", "number_of_persons_injured", "count"]
-    )
+    columns = ["number_of_persons_killed", "number_of_persons_injured", "count"]
+    chart = px.line(cumulatives["year"], x="year", y=columns, template=template)
+    chart2 = px.line(cumulatives["borough"], x="borough", y=columns, template=template)
     st.plotly_chart(chart)
     st.subheader("Crashes and damage by boroughs")
     st.plotly_chart(chart2)
