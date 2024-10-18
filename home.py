@@ -2,6 +2,7 @@ import json
 
 import altair
 import pandas as pd
+import plotly.express as px
 import polars as pl
 import streamlit as st
 
@@ -88,39 +89,49 @@ years = range(2012, 2025)
 
 OPTIONS = {"borough": boroughs, "year": years}
 
+with st.container():
+    with col[0]:
+        subcols = st.columns((1, 1), gap="small")
+        with subcols[0]:
+            write_metric("Total number of crashes")
+            write_metric("Crashes with time and location")
+            write_metric("Total killed")
+            write_metric("Total injured")
 
-with col[0]:
-    subcols = st.columns((1, 1), gap="small")
-    with subcols[0]:
-        write_metric("Total number of crashes")
-        write_metric("Crashes with time and location")
-        write_metric("Total killed")
-        write_metric("Total injured")
+        with subcols[1]:
+            write_metric("Locations marked")
+            write_metric("Locations unmarked")
 
-    with subcols[1]:
-        write_metric("Locations marked")
-        write_metric("Locations unmarked")
+            write_metric("Valid markings")
+            write_metric("Invalid markings")
 
-        write_metric("Valid markings")
-        write_metric("Invalid markings")
+    with col[1]:
+        for column in by:
+            selected = st.selectbox(label=f"By {column}", options=OPTIONS[column])
+            keys = list(averages["borough"].keys())
+            subcols = st.columns((1,) * len(keys), gap="small")
+
+            for i, key in enumerate(keys):
+                with subcols[i]:
+                    value = metrics[selected][key]
+                    delta = value - averages[column][key]
+                    delta = round(delta, 2)
+                    st.metric(
+                        label=" ".join(str(key).capitalize().split("_")),
+                        value=value,
+                        delta=delta,
+                        delta_color="inverse",
+                    )
 
 
-with col[1]:
-    for column in by:
-        selected = st.selectbox(label=f"By {column}", options=OPTIONS[column])
-        keys = list(averages["borough"].keys())
-        subcols = st.columns((1,) * len(keys), gap="small")
+cols = st.columns((1, 1), gap="small")
 
-        for i, key in enumerate(keys):
-            with subcols[i]:
-                value = metrics[selected][key]
-                delta = value - averages[column][key]
-                delta = round(delta, 2)
-                st.metric(
-                    label=" ".join(str(key).capitalize().split("_")), value=value, delta=delta, delta_color="inverse"
-                )
+with st.container():
+    for i, column in enumerate(by):
+        with cols[i]:
+            st.subheader(f"Correlation by {column}")
+            corr = correlations[column]
+            # corr.style.background_gradient(cmap="gradient")
 
-with col[2]:
-    for column in by:
-        st.subheader(f"Correlation by {column}")
-        st.write(correlations[column])
+            fig = px.imshow(corr, text_auto=True)
+            st.plotly_chart(fig, theme="streamlit")
