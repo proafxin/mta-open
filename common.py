@@ -25,7 +25,7 @@ def persist_data_bitmask(data: pl.DataFrame, by: list[str], on: list[str]) -> No
 
     for i in range(1, (1 << n_cols)):
         keys = []
-        for j in range(i):
+        for j in range(n_cols):
             if (i & (1 << j)) != 0:
                 keys.append(by[j])
 
