@@ -107,12 +107,12 @@ if len(keys) > 0:
 
     metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "total_damage", "count"]
     metric_cols = sorted(metric_cols)
-    for row in filtered.to_dicts():
-        subcols = st.columns((1,) * len(metric_cols), gap="small")
 
-        for i, col in enumerate(metric_cols):
-            with subcols[i]:
-                st.metric(" ".join(col.split("_")).capitalize(), row[col])
+    subcols = st.columns((1,) * len(metric_cols), gap="small")
+
+    for i, col in enumerate(metric_cols):
+        with subcols[i]:
+            st.metric(" ".join(col.split("_")).capitalize(), filtered[col].sum())
 
 
 st.header("Charts by a specific criteria")

@@ -1,3 +1,4 @@
+from datetime import date
 from enum import Enum
 
 import polars as pl
@@ -10,7 +11,21 @@ class Option(str, Enum):
     DATE = "date"
 
 
+class Incident(str, Enum):
+    CRASH = "Number of crash"
+    KILLED = "Number of persons killed"
+    INJURED = "Number of persons injured"
+
+
 options = [Option.DATE.value, Option.YEAR.value, Option.MONTH.value, Option.HOUR.value]
+
+
+def form_mapfilename(cols: list[str]) -> str:
+    cols = sorted(cols)
+    cols = [col.lower().strip().replace(" ", "_") for col in cols]
+    filename = f"data/maps/{"__".join(cols)}.parquet"
+
+    return filename
 
 
 def form_filename(keys: list[str], on: list[str]) -> str:
@@ -25,12 +40,18 @@ def persist_data_bitmask(data: pl.DataFrame, by: list[str], on: list[str]) -> No
 
     for i in range(1, (1 << n_cols)):
         keys = []
-        for j in range(i):
+        for j in range(n_cols):
             if (i & (1 << j)) != 0:
                 keys.append(by[j])
 
         grouped = (
             data.drop_nulls(subset=keys).group_by(keys).agg(pl.col(on).sum(), pl.col(on[0]).count().alias("count"))
         )
+        grouped = grouped.sort(by=keys)
 
         grouped.write_parquet(form_filename(keys=keys, on=on))
+
+
+MINIMUMS = {"date": date(day=1, month=7, year=2012), "year": 2012, "month": 1, "hour": 0}
+MAXIMUMS = {"date": date(day=8, month=10, year=2024), "year": 2024, "month": 12, "hour": 23}
+MEDIANS = {"date": date(day=1, month=7, year=2014), "year": 2014, "month": 7, "hour": 12}

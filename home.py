@@ -9,9 +9,6 @@ st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations
 
 data = read_parquet("data/processed.parquet")
 url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95/about_data"
-st.link_button("Find details about the dataset here", url=url)
-markdown = f"Data spans from {data['date'].min()} to {data['date'].max()}."  # type: ignore[str-bytes-safe]
-st.markdown(markdown)
 
 ""
 altair.themes.enable("dark")
@@ -73,6 +70,10 @@ col = st.columns((2, 2), gap="small")
 
 
 with col[0]:
+    st.link_button("Find details about the dataset here", url=url)
+    markdown = f"Data spans from {data['date'].min()} to {data['date'].max()}."  # type: ignore[str-bytes-safe]
+    st.markdown(markdown)
+
     columns = data.columns
     st.subheader("Data Cleaning Policy")
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
