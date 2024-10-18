@@ -9,6 +9,10 @@ import streamlit as st
 st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
 st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations")
 
+""
+st.header("Dashboards and Overall Metrics")
+
+
 with open("data/metrics.json", mode="r") as f:
     metric = json.load(f)
 
@@ -18,7 +22,7 @@ url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Cras
 altair.themes.enable("dark")
 
 
-col = st.columns((0.8, 1.5, 1), gap="small")
+col = st.columns((0.7, 1.5, 1), gap="small")
 
 
 def write_metric(label: str):
@@ -27,6 +31,11 @@ def write_metric(label: str):
 
 with st.sidebar:
     st.link_button("About Dataset", url=url)
+    templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
+    choose_template = st.checkbox("Choose template?")
+    template = None
+    if choose_template:
+        template = st.selectbox(label="Template", options=templates)
     st.subheader("Data Cleaning policy")
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
@@ -54,7 +63,7 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame]]:
+def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame], dict[str, pl.DataFrame]]:
     metrics: dict[str | int, dict] = {}
     total: dict[str, dict[str, int | float]] = {}
     correlations: dict[str, pl.DataFrame] = {}
@@ -79,15 +88,23 @@ def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame]]:
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, total, correlations  # type: ignore
+    return metrics, total, correlations, cumulatives  # type: ignore
 
 
-metrics, averages, correlations = calculate_metrics()
+metrics, averages, correlations, cumulatives = calculate_metrics()
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 years = range(2012, 2025)
 
 OPTIONS = {"borough": boroughs, "year": years}
+
+
+def draw_correlation(column: str) -> None:
+    st.subheader(f"Correlation between incidents by {column}")
+    corr = correlations[column]
+    fig = px.imshow(corr, text_auto=True, aspect="auto", template=template)
+    st.plotly_chart(fig, theme="streamlit")
+
 
 with st.container():
     with col[0]:
@@ -109,7 +126,7 @@ with st.container():
         for column in by:
             selected = st.selectbox(label=f"By {column}", options=OPTIONS[column])
             keys = list(averages["borough"].keys())
-            subcols = st.columns((1,) * len(keys), gap="small")
+            subcols = st.columns((1,) * (len(keys) + 1), gap="small")
 
             for i, key in enumerate(keys):
                 with subcols[i]:
@@ -122,16 +139,23 @@ with st.container():
                         delta=delta,
                         delta_color="inverse",
                     )
+            with subcols[-1]:
+                st.download_button(
+                    label=f"Correlation data for {column}s",
+                    data=correlations[column].to_csv(),
+                    mime="text/csv",
+                    file_name=f"correlation_{column}.csv",
+                )
 
+    with col[2]:
+        draw_correlation(column="borough")
 
-cols = st.columns((1, 1), gap="small")
 
 with st.container():
-    for i, column in enumerate(by):
-        with cols[i]:
-            st.subheader(f"Correlation by {column}")
-            corr = correlations[column]
-            # corr.style.background_gradient(cmap="gradient")
-
-            fig = px.imshow(corr, text_auto=True, aspect="auto")
-            st.plotly_chart(fig, theme="streamlit")
+    st.subheader("Crashes and damage over the years")
+    columns = ["number_of_persons_killed", "number_of_persons_injured", "count"]
+    chart = px.line(cumulatives["year"], x="year", y=columns, template=template)
+    chart2 = px.line(cumulatives["borough"], x="borough", y=columns, template=template)
+    st.plotly_chart(chart)
+    st.subheader("Crashes and damage by boroughs")
+    st.plotly_chart(chart2)

@@ -6,12 +6,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 
-st.title("Map of incidents")
-
-
-@st.cache_resource
-def load_data() -> pl.DataFrame:
-    return pl.read_parquet("data/clean_map.parquet")
+st.title("Map of crashes by date")
 
 
 def form_mapfilename(col: str) -> str:
@@ -33,21 +28,15 @@ boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 color_map = {borough: color for borough, color in zip(boroughs, COLORS)}
 
 
-clean_data = load_data()
-
-data_load_state = st.text("Loading data...")
-data_load_state.text("Loading data...done!")
-
-
 option = "date"
-st.subheader(f"{option.capitalize()} range")
 minimum = date(day=1, month=7, year=2012)
 maximum = date(day=8, month=10, year=2024)
 median = date(day=1, month=7, year=2014)
 
+with st.sidebar:
+    time = st.slider(label=f"Pick a {option}", min_value=minimum, max_value=maximum, value=median)
+    selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
 
-time = st.slider(option.upper(), minimum, maximum, value=median)  # type: ignore [arg-type, type-var]
-selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
 map_state = st.text(f"Loading map of crashes by {option} = {time}...")  # type: ignore [str-bytes-safe]
 
 data = []
@@ -57,6 +46,7 @@ for col in selected_boroughs:
     filtered_data = filtered_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
     data.append(filtered_data)
 
+
 with st.container():
     map_data = pl.concat(data)
     if map_data.shape[0] == 0:
@@ -64,5 +54,5 @@ with st.container():
     else:
         st.map(data=map_data, latitude="latitude", longitude="longitude", color="color", height=750)
 
-# st.map(data=filtered_data, latitude="latitude", longitude="longitude", color="color", height=750)
+
 map_state.text(f"Loading map of crashes by {option} = {time}...DONE!")  # type: ignore [str-bytes-safe]
