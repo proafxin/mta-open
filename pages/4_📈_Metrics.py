@@ -46,7 +46,9 @@ def form_filename(keys: list[str], on: list[str]) -> str:
 
 @st.cache_resource
 def load_stats(keys: list[str]) -> pl.DataFrame:
-    filename = form_filename(keys=keys, on=["number_of_persons_killed", "number_of_persons_injured", "total_damage"])
+    filename = form_filename(
+        keys=keys, on=["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
+    )
 
     return pl.read_parquet(filename)
 
@@ -60,7 +62,7 @@ if len(keys) > 0:
     for key in keys[1:]:
         filtered = filtered.filter(pl.col(key).eq(inputs[key]))
 
-    metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "total_damage", "count"]
+    metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty", "count"]
     metric_cols = sorted(metric_cols)
 
     subcols = st.columns((1,) * len(metric_cols), gap="small")
