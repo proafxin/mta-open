@@ -33,9 +33,10 @@ minimum = date(day=1, month=7, year=2012)
 maximum = date(day=8, month=10, year=2024)
 median = date(day=1, month=7, year=2014)
 
+with st.sidebar:
+    time = st.slider(label=f"Pick a {option}", min_value=minimum, max_value=maximum, value=median)
+    selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
 
-time = st.slider(label=f"Pick a {option}", min_value=minimum, max_value=maximum, value=median)
-selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
 map_state = st.text(f"Loading map of crashes by {option} = {time}...")  # type: ignore [str-bytes-safe]
 
 data = []

@@ -27,7 +27,7 @@ cols = st.columns((1,) * len(selectable_columns))
 
 for i, column in enumerate(selectable_columns):
     with cols[i]:
-        select = st.checkbox(label=f"Choose {column}?")
+        select = st.checkbox(label=f"Choose {column}?", value=True)
 
         if select:
             criteria = st.selectbox(label=f"Select {column}", options=COLUMN_VALUES[column])  # type: ignore [var-annotated]
