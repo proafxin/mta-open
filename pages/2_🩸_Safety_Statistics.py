@@ -4,6 +4,11 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 
+@st.cache_resource
+def load_data(column: str) -> pl.DataFrame:
+    return pl.read_parquet(f"data/borough_{column}.parquet")
+
+
 st.header("Safety Statistics")
 safety_columns = ["year", "month", "hour"]
 
@@ -19,5 +24,5 @@ safety_cols = st.columns((1,) * len(safety_columns), gap="small")
 for i, column in enumerate(safety_columns):
     with safety_cols[i]:
         with st.expander("Click to see stats"):
-            pivot = pl.read_parquet(f"data/borough_{column}.parquet")
+            pivot = load_data(column=column)
             st.dataframe(pivot)

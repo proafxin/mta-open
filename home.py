@@ -1,13 +1,23 @@
 import altair
+import polars as pl
 import streamlit as st
-from polars import read_parquet
 
 st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
 st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations")
 ""
 ""
 
-data = read_parquet("data/processed.parquet")
+
+@st.cache_resource
+def load_data() -> pl.DataFrame:
+    return pl.read_parquet("data/processed.parquet")
+
+
+@st.cache_resource
+def invalid_coordindate_data() -> pl.DataFrame:
+    return pl.read_parquet("data/invalid_coordinate.parquet")
+
+
 url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95/about_data"
 
 ""
@@ -68,6 +78,8 @@ st.markdown(
 
 col = st.columns((2, 2), gap="small")
 
+data = load_data()
+
 
 with col[0]:
     st.link_button("Find details about the dataset here", url=url)
@@ -105,7 +117,7 @@ with col[1]:
         marked = marked.drop_nulls(subset=["longitude"])
         st.metric("Locations marked", marked.shape[0])
         st.metric("Locations unmarked", data.shape[0] - marked.shape[0])
-        invalid = read_parquet("data/invalid_coordinate.parquet")
+        invalid = invalid_coordindate_data()
         st.metric("Valid markings", value=marked.shape[0] - invalid.shape[0])
         st.metric("Invalid markings", invalid.shape[0])
 
