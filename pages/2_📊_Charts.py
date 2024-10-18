@@ -38,8 +38,7 @@ COLUMNS = {
     "Number of persons injured": "number_of_persons_injured",
 }
 
-with st.sidebar:
-    column = st.selectbox(label="Generate data for", options=COLUMNS.keys())
+column = st.selectbox(label="Generate data for", options=COLUMNS.keys())
 
 data = load_time_data(boroughs=selected_boroughs, option=option)
 data = data.filter(pl.col(option).is_between(lower_bound=start_time, upper_bound=end_time))
@@ -66,6 +65,7 @@ with st.sidebar:
         label="Output type",
         options=[ReportType.CHART.value, ReportType.DATAFRAME.value, ReportType.FILE_DOWNLOAD.value],
     )
+
 if reporting == ReportType.CHART.value:
     with st.sidebar:
         visualization = st.selectbox(

@@ -74,10 +74,10 @@ def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame], dict[str, 
         cumulatives[column] = data.select(
             pl.col(column),
             pl.col("number_of_persons_killed").cum_sum(),
-            pl.col("number_of_persons_injured"),
+            pl.col("number_of_persons_injured").cum_sum(),
             pl.col("count").cum_sum(),
         )
-        df_pandas = data.drop([column, "total_damage"]).to_pandas()
+        df_pandas = data.drop([column, "number_of_casualty"]).to_pandas()
         df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
         correlations[column] = df_pandas.corr()  # type: ignore [assignment]
         total[column] = {}
@@ -152,10 +152,10 @@ with st.container():
 
 
 with st.container():
-    st.subheader("Crashes and damage over the years")
+    st.subheader("Crashes and casualty over the years")
     columns = ["number_of_persons_killed", "number_of_persons_injured", "count"]
     chart = px.line(cumulatives["year"], x="year", y=columns, template=template)
     chart2 = px.line(cumulatives["borough"], x="borough", y=columns, template=template)
     st.plotly_chart(chart)
-    st.subheader("Crashes and damage by boroughs")
+    st.subheader("Crashes and casualty by boroughs")
     st.plotly_chart(chart2)
