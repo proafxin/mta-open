@@ -96,9 +96,8 @@ with st.container():
 
         st_folium(fig=fl_map, use_container_width=True)
 
-        # leaf = leafmap.Map(center=center)
+        # leaf = lm.Map(center=center)
         # st.write(map_data.head())
-        # leaf.add_basemap("OpenTopoMap")
 
         # leaf.add_heatmap(data=map_data, latitude="latitude", longitude="longitude")
         # leaf.to_streamlit()
