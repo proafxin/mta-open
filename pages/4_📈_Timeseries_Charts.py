@@ -3,34 +3,39 @@ import streamlit as st
 
 st.set_page_config(layout="wide")
 
-from common import options  # noqa: E402
+from common import MAXIMUMS, MEDIANS, MINIMUMS, options  # noqa: E402
 
-st.title("Range queries by time")
+option = st.selectbox(label="Time to filter by", options=options)
 
 
 @st.cache_resource
-def load_data() -> pl.DataFrame:
-    return pl.read_parquet("data/time_only.parquet")
+def load_time_data(boroughs: list[str], option: str) -> pl.DataFrame:
+    data = pl.read_parquet(f"data/borough__{option}.parquet")
+
+    return data.filter(pl.col("borough").is_in(boroughs))
 
 
-data_time = load_data()
-
-""
-st.subheader("Number of crashes in New York within date range")
-""
-option = st.selectbox(label="Time to filter by", options=options)
-
-st.subheader(f"Map by {option}")
-minimum = data_time[option].min()  # type: ignore [arg-type]
-maximum = data_time[option].max()  # type: ignore [arg-type]
-value = (minimum, maximum)
-start_time, end_time = st.slider(option.upper(), minimum, maximum, value)  # type: ignore [arg-type, type-var]
+minimum = MINIMUMS[option]
+maximum = MAXIMUMS[option]
+value = (minimum, MEDIANS[option])
+start_time, end_time = st.slider(option.upper(), minimum, maximum, value)  # type: ignore [call-overload]
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
-selected_boroughs = options = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs)
-data_filtered = data_time.filter(pl.col("borough").is_in(selected_boroughs))
 
-value_counts = data_filtered.group_by(["borough", option]).len()
+selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs)
+
+COLUMNS = {
+    "Number of Crashes": "count",
+    "Number of persons killed": "number_of_persons_killed",
+    "Number of persons injured": "number_of_persons_injured",
+}
+
+column = st.selectbox(label="Check statistics for", options=COLUMNS.keys())
+
+data = load_time_data(boroughs=selected_boroughs, option=option)
+data = data.filter(pl.col(option).is_between(lower_bound=start_time, upper_bound=end_time))
+
+
 ""
-st.line_chart(value_counts, x=option, y="len", color="borough")
+st.line_chart(data=data, x=option, y=COLUMNS[column], color="borough")
 ""
