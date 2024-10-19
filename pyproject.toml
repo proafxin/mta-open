@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mta-open"
-version = "1.2.0"
+version = "1.3.0"
 description = ""
 authors = ["Masum Billal <billalmasum93@gmail.com>"]
 license = "LICENSE"
