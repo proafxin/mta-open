@@ -4,6 +4,7 @@ import altair
 import plotly.express as px
 import polars as pl
 import streamlit as st
+from plotly.io import templates
 
 st.set_page_config(layout="wide")
 
@@ -59,15 +60,14 @@ column = COLUMN_MAP[selected_column]
 with st.sidebar:
     reporting = st.selectbox(label="Output type", options=[ReportType.CHART.value, ReportType.DATAFRAME.value])
 
-if is_cumulative:
     if reporting == ReportType.CHART.value:
-        with st.sidebar:
-            templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
-            choose_template = st.checkbox("Choose template?")
-            template = None
-            if choose_template:
-                template = st.selectbox(label="Template", options=templates)
+        template = None
+        choose_template = st.checkbox("Choose template?")
+        if choose_template:
+            template = st.selectbox(label="Template", options=templates)
 
+
+if is_cumulative:
     by = st.selectbox(label="Cumulative by", options=["borough", "year"])
 
     cumulative = load_cumulative(column=by)
@@ -122,23 +122,22 @@ else:
                     VisualizationType.AREA.value,
                 ],
             )
+        column = COLUMN_MAP[selected_column]
         if visualization == VisualizationType.LINE.value:
-            st.line_chart(data=data, x=option, y=COLUMN_MAP[selected_column], color="borough")
+            px_chart = px.line(data_frame=data, x=option, y=column, color="borough", template=template)
         elif visualization == VisualizationType.AREA.value:
-            st.area_chart(data=data, x=option, y=COLUMN_MAP[selected_column], color="borough")
+            px_chart = px.area(data_frame=data, x=option, y=column, color="borough", template=template)
         elif visualization == VisualizationType.BAR.value:
-            st.bar_chart(data=data, x=option, y=COLUMN_MAP[selected_column], color="borough")
+            px_chart = px.bar(data_frame=data, x=option, y=column, color="borough", template=template)
         elif visualization == VisualizationType.CIRCLE.value:
-            st.scatter_chart(
-                data=data, x=option, y=COLUMN_MAP[selected_column], color="borough", size=COLUMN_MAP[selected_column]
-            )
+            px_chart = px.scatter(data_frame=data, x=option, y=column, color="borough", template=template, size=column)
         else:
-            chart = (
-                altair.Chart(data=data)
-                .mark_point()
-                .encode(x=option, y=COLUMN_MAP[selected_column], color="borough", size=COLUMN_MAP[selected_column])
+            alt_chart = (
+                altair.Chart(data=data).mark_point().encode(x=option, y=column, color="borough", size=column)
             ).interactive()
-            st.altair_chart(chart, use_container_width=True)
+            st.altair_chart(alt_chart, use_container_width=True)
+        if "px_chart" in locals():
+            st.plotly_chart(px_chart)
 
     elif reporting == ReportType.DATAFRAME.value:
         max_rows = 1000

@@ -1,6 +1,7 @@
 import plotly.express as px
 import polars as pl
 import streamlit as st
+from plotly.io import templates
 
 st.set_page_config(layout="wide")
 
@@ -39,7 +40,6 @@ def draw_correlation(data: pl.DataFrame, template: str | None = None) -> None:
 
 
 with st.sidebar:
-    templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
     choose_template = st.checkbox("Choose template?")
     template = None
     if choose_template:
