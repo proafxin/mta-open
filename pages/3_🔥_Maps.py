@@ -3,6 +3,8 @@ from enum import Enum
 
 import folium
 import folium.map
+import geopandas as gpd
+import plotly.express as px
 import polars as pl
 import streamlit as st
 from streamlit_folium import st_folium
@@ -55,6 +57,10 @@ minimum = date(day=1, month=7, year=2012)
 maximum = date(day=8, month=10, year=2024)
 median = date(day=1, month=7, year=2014)
 
+columns = ["number_of_persons_killed", "number_of_persons_injured", "count", "number_of_casualty"]
+columns_readable = [col.capitalize().replace("_", " ") for col in columns]
+COLUMN_MAP = {col1: col2 for col1, col2 in zip(columns_readable, columns)}
+
 
 class MapType(str, Enum):
     HEATMAP = "Heatmap"
@@ -74,6 +80,11 @@ def load_multiple_borough_maps(selected_boroughs: list[str]) -> pl.DataFrame:
     map_data = pl.DataFrame(map_data)
 
     return map_data
+
+
+@st.cache_resource
+def load_geo_data() -> gpd.GeoDataFrame:
+    return gpd.read_parquet("data/heatmap.parquet")
 
 
 with st.sidebar:
@@ -106,6 +117,35 @@ if map_type == MapType.GEOGRAPHICAL:
 
         st_folium(fig=fl_map, use_container_width=True, returned_objects=[])
 elif map_type == MapType.HEATMAP.value:
-    map_data = load_multiple_borough_maps(selected_boroughs=boroughs)
-    map_data = map_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS_CODE).alias("color"))
-    st.map(data=map_data, latitude="latitude", longitude="longitud", size=2000, color="color")
+    selected_column = st.selectbox("Generate heatmap for", COLUMN_MAP.keys())
+    column = COLUMN_MAP[selected_column]
+    template = None
+    color_scale = None
+
+    with st.sidebar:
+        templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none", "plotly_white", "plotly_dark"]
+        choose_template = st.checkbox("Choose template?")
+        if choose_template:
+            template = st.selectbox(label="Template", options=templates)
+
+        choose_color_scale = st.checkbox("Choose color scale?")
+        if choose_color_scale:
+            color_scale = st.selectbox(label="Color scale", options=px.colors.named_colorscales())  # type:  ignore
+
+    geo_data = load_geo_data()
+    hover_names = [col.replace("_", " ").capitalize() for col in geo_data.columns]
+
+    geo_data = geo_data.set_index("borough")
+    fig = px.choropleth(
+        geo_data,
+        geojson=geo_data.geometry,
+        locations=geo_data.index,
+        color=column,
+        template=template,
+        color_continuous_scale=color_scale,
+        height=950,
+    )
+    fig.update_geos(fitbounds="locations", visible=False)
+    fig.update_layout(margin={"r": 0, "t": 0, "l": 0, "b": 0})
+
+    st.plotly_chart(fig)

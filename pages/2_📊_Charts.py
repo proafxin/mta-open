@@ -34,11 +34,7 @@ def load_time_data(boroughs: list[str], option: str) -> pl.DataFrame:
 @st.cache_resource
 def load_cumulative(column: str) -> pl.DataFrame:
     cumulative = pl.read_parquet(f"data/cumulative_{column}.parquet")
-    # cumulative = cumulative.drop("total_casualty")
-    # cumulative = cumulative.with_columns(
-    #     pl.sum_horizontal("number_of_persons_killed", "number_of_persons_injured").cum_sum().alias("number_of_casualty")
-    # )
-    # cumulative.write_parquet(f"data/cumulative_{column}.parquet")
+
     return cumulative
 
 
