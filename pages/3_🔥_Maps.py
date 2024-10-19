@@ -97,5 +97,8 @@ if map_type == MapType.GEOGRAPHICAL:
                 tooltip=f"Location: ({row["latitude"]}, {row["longitude"]})",
                 icon=folium.Icon(color=color_map[row["borough"]], icon="angle"),
             ).add_to(fl_map)
+        sw = list(map_data.select("latitude", "longitude").min().to_numpy()[0])
+        ne = list(map_data.select("latitude", "longitude").max().to_numpy()[0])
+        fl_map.fit_bounds([sw, ne])
 
         st_folium(fig=fl_map, use_container_width=True, returned_objects=[])

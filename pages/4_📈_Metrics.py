@@ -103,9 +103,11 @@ column = st.selectbox(label="Select", options=by)
 data = load_data(column=column)
 
 draw_correlation(data=data, template=template)
-st.download_button(
-    label=f"Correlation data for {column}s",
-    data=data.to_pandas().to_csv(),
-    mime="text/csv",
-    file_name=f"correlation_{column}.csv",
-)
+
+with st.sidebar:
+    st.download_button(
+        label=f"Correlation data for {column}s",
+        data=data.to_pandas().to_csv(),
+        mime="text/csv",
+        file_name=f"correlation_{column}.csv",
+    )

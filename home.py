@@ -5,10 +5,10 @@ import polars as pl
 import streamlit as st
 
 st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
-st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations")
+st.title("12 Years of New York Motor Vehicles Crash: Statistics and Visualizations")
 
 ""
-st.header("Dashboards and Overall Metrics")
+st.header("Overall Insights")
 
 
 with open("data/metrics.json", mode="r") as f:
@@ -20,7 +20,7 @@ url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Cras
 altair.themes.enable("dark")
 
 
-col = st.columns((0.7, 1.5, 1), gap="small")
+col = st.columns((0.45, 1, 0.67), gap="small")
 
 
 def write_metric(label: str):
@@ -56,24 +56,35 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict]:
+def calculate_metrics() -> tuple[dict, dict, dict, dict]:
     metrics: dict[str | int, dict] = {}
     averages: dict[str, dict[str, int | float]] = {}
+    minimums: dict[str, dict[str, tuple[str | int, int]]] = {}
+    maximums: dict[str, dict[str, tuple[str | int, int]]] = {}
+
     for column in by:
         data = load_metric(column=column)
 
         averages[column] = {}
+        minimums[column] = {}
+        maximums[column] = {}
+
         for status in data.columns[1:]:
             averages[column][status] = int(data[status].sum()) / data[column].shape[0]
+            sorted_data = data.select(column, status).sort(by=status)
+            min_row = sorted_data.row(0)
+            max_row = sorted_data.row(-1)
+            minimums[column][status] = min_row
+            maximums[column][status] = max_row
 
         for row in data.to_dicts():
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, averages  # type: ignore
+    return metrics, averages, minimums, maximums  # type: ignore
 
 
-metrics, averages = calculate_metrics()
+metrics, averages, minimums, maximums = calculate_metrics()
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 years = range(2012, 2025)
@@ -81,12 +92,19 @@ years = range(2012, 2025)
 OPTIONS = {"borough": boroughs, "year": years}
 
 
+def min_max_metric(column: str, status: str) -> None:
+    value = minimums[column][status][0]
+    if isinstance(value, str):
+        value = " ".join([token.lower().capitalize() for token in value.split(" ")])
+    st.metric(label=f"{column.capitalize()} with least {status.replace("_", " ")}", value=value)
+
+
 with st.container():
     with col[0]:
         subcols = st.columns((1, 1), gap="small")
         with subcols[0]:
             write_metric("Total number of crashes")
-            write_metric("Crashes with time and location")
+            write_metric("Crashes with time, location")
             write_metric("Total killed")
             write_metric("Total injured")
 
@@ -114,3 +132,11 @@ with st.container():
                         delta=delta,
                         delta_color="inverse",
                     )
+
+    with col[2]:
+        subcols = st.columns((1,) * len(by))
+
+        for i, column in enumerate(by):
+            with subcols[i]:
+                for status in minimums[column]:
+                    min_max_metric(column=column, status=status)
