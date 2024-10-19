@@ -8,7 +8,7 @@ st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
 st.title("12 Years of New York Motor Vehicles Crash: Statistics and Visualizations")
 
 ""
-st.header("Overall Insights")
+st.header("High Level Statistics")
 
 
 with open("data/metrics.json", mode="r") as f:

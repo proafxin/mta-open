@@ -31,9 +31,14 @@ def load_time_data(boroughs: list[str], option: str) -> pl.DataFrame:
     return data.filter(pl.col("borough").is_in(boroughs))
 
 
+columns = ["number_of_crash", "number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
+
+
 @st.cache_resource
 def load_cumulative(column: str) -> pl.DataFrame:
-    cumulative = pl.read_parquet(f"data/cumulative_{column}.parquet")
+    cumulative = pl.read_parquet(f"data/{column}.parquet")
+    for column in columns:
+        cumulative = cumulative.with_columns(pl.col(column).cum_sum().alias(column))
 
     return cumulative
 
@@ -41,7 +46,6 @@ def load_cumulative(column: str) -> pl.DataFrame:
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 
 
-columns = ["number_of_persons_killed", "number_of_persons_injured", "count", "number_of_casualty"]
 columns_readable = [col.capitalize().replace("_", " ") for col in columns]
 COLUMN_MAP = {col1: col2 for col1, col2 in zip(columns_readable, columns)}
 
@@ -53,10 +57,7 @@ selected_column = st.selectbox(label="Select", options=COLUMN_MAP.keys())
 column = COLUMN_MAP[selected_column]
 
 with st.sidebar:
-    reporting = st.selectbox(
-        label="Output type",
-        options=[ReportType.CHART.value, ReportType.DATAFRAME.value, ReportType.FILE_DOWNLOAD.value],
-    )
+    reporting = st.selectbox(label="Output type", options=[ReportType.CHART.value, ReportType.DATAFRAME.value])
 
 if is_cumulative:
     if reporting == ReportType.CHART.value:
@@ -85,7 +86,7 @@ if is_cumulative:
         st.plotly_chart(chart)
     elif reporting == ReportType.DATAFRAME.value:
         st.write(data)
-    else:
+    with st.sidebar:
         filename = f"cumulative_{by}_{column}.csv"
         st.download_button(
             label=f"Download cumulative data of {by} by {column.replace("_", " ")}",
@@ -144,7 +145,7 @@ else:
         n_rows = st.number_input(label="Number of rows", min_value=1, max_value=max_rows, value=10)
         st.info(f"You can check at most {max_rows} rows here.", icon="ℹ️")
         st.dataframe(data=data.head(n=n_rows))
-    else:
+    with st.sidebar:
         download_filename = f'{"_".join([borough.lower().replace(" ", "_") for borough in selected_boroughs])}_{selected_column}_{start_time}_{end_time}.csv'
         st.download_button(
             label="Download", data=data.to_pandas().to_csv(), mime="text/csv", file_name=download_filename

@@ -5,7 +5,7 @@ import streamlit as st
 st.set_page_config(layout="wide")
 
 
-st.title("Metrics and Statistical Correlation Between Incidents")
+st.title("Metrics and Statistical Correlation")
 
 
 def form_filename(keys: list[str], on: list[str]) -> str:
@@ -79,6 +79,8 @@ for i, column in enumerate(selectable_columns):
 
 
 keys = list(inputs.keys())
+metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty", "number_of_crash"]
+
 if len(keys) > 0:
     stats = load_stats(keys=keys)
 
@@ -87,7 +89,6 @@ if len(keys) > 0:
     for key in keys[1:]:
         filtered = filtered.filter(pl.col(key).eq(inputs[key]))
 
-    metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty", "count"]
     metric_cols = sorted(metric_cols)
 
     subcols = st.columns((1,) * len(metric_cols), gap="small")
