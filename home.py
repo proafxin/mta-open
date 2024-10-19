@@ -1,8 +1,6 @@
 import json
 
 import altair
-import pandas as pd
-import plotly.express as px
 import polars as pl
 import streamlit as st
 
@@ -31,11 +29,6 @@ def write_metric(label: str):
 
 with st.sidebar:
     st.link_button("About Dataset", url=url)
-    templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
-    choose_template = st.checkbox("Choose template?")
-    template = None
-    if choose_template:
-        template = st.selectbox(label="Template", options=templates)
     st.subheader("Data Cleaning policy")
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
@@ -63,40 +56,29 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame]]:
+def calculate_metrics() -> tuple[dict, dict]:
     metrics: dict[str | int, dict] = {}
-    total: dict[str, dict[str, int | float]] = {}
-    correlations: dict[str, pl.DataFrame] = {}
+    averages: dict[str, dict[str, int | float]] = {}
     for column in by:
         data = load_metric(column=column)
 
-        df_pandas = data.drop([column, "number_of_casualty"]).to_pandas()
-        df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
-        correlations[column] = df_pandas.corr()  # type: ignore [assignment]
-        total[column] = {}
+        averages[column] = {}
         for status in data.columns[1:]:
-            total[column][status] = int(data[status].sum()) / data[column].shape[0]
+            averages[column][status] = int(data[status].sum()) / data[column].shape[0]
 
         for row in data.to_dicts():
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, total, correlations  # type: ignore
+    return metrics, averages  # type: ignore
 
 
-metrics, averages, correlations = calculate_metrics()
+metrics, averages = calculate_metrics()
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 years = range(2012, 2025)
 
 OPTIONS = {"borough": boroughs, "year": years}
-
-
-def draw_correlation(column: str) -> None:
-    st.subheader(f"Correlation between incidents by {column}")
-    corr = correlations[column]
-    fig = px.imshow(corr, text_auto=True, aspect="auto", template=template)
-    st.plotly_chart(fig, theme="streamlit")
 
 
 with st.container():
@@ -132,13 +114,3 @@ with st.container():
                         delta=delta,
                         delta_color="inverse",
                     )
-            with subcols[-1]:
-                st.download_button(
-                    label=f"Correlation data for {column}s",
-                    data=correlations[column].to_csv(),
-                    mime="text/csv",
-                    file_name=f"correlation_{column}.csv",
-                )
-
-    with col[2]:
-        draw_correlation(column="borough")
