@@ -7,6 +7,7 @@ import geopandas as gpd
 import plotly.express as px
 import polars as pl
 import streamlit as st
+from plotly.io import templates
 from streamlit_folium import st_folium
 
 st.set_page_config(layout="wide")
@@ -103,11 +104,12 @@ if map_type == MapType.GEOGRAPHICAL:
     else:
         center = (map_data["latitude"].mean(), map_data["longitude"].mean())
         fl_map = folium.Map(location=center, tiles="cartodbpositron", zoom_start=10)
+        folium.TileLayer(tiles="OpenStreetMap").add_to(fl_map)
 
         for row in map_data.to_dicts():
             folium.Marker(
                 location=row["coordinate"],
-                popup=f"Borough: {row["borough"]}",
+                popup=row["borough"],
                 tooltip=f"Location: ({row["latitude"]}, {row["longitude"]})",
                 icon=folium.Icon(color=color_map[row["borough"]], icon="angle"),
             ).add_to(fl_map)
@@ -123,7 +125,6 @@ elif map_type == MapType.HEATMAP.value:
     color_scale = None
 
     with st.sidebar:
-        templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none", "plotly_white", "plotly_dark"]
         choose_template = st.checkbox("Choose template?")
         if choose_template:
             template = st.selectbox(label="Template", options=templates)

@@ -45,7 +45,9 @@ def persist_data_bitmask(data: pl.DataFrame, by: list[str], on: list[str]) -> No
                 keys.append(by[j])
 
         grouped = (
-            data.drop_nulls(subset=keys).group_by(keys).agg(pl.col(on).sum(), pl.col(on[0]).count().alias("count"))
+            data.drop_nulls(subset=keys)
+            .group_by(keys)
+            .agg(pl.col(on).sum(), pl.col(on[0]).count().alias("number_of_crash"))
         )
         grouped = grouped.sort(by=keys)
 
