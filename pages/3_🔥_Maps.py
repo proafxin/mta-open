@@ -7,6 +7,7 @@ import geopandas as gpd
 import plotly.express as px
 import polars as pl
 import streamlit as st
+from plotly.io import templates
 from streamlit_folium import st_folium
 
 st.set_page_config(layout="wide")
@@ -124,7 +125,6 @@ elif map_type == MapType.HEATMAP.value:
     color_scale = None
 
     with st.sidebar:
-        templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none", "plotly_white", "plotly_dark"]
         choose_template = st.checkbox("Choose template?")
         if choose_template:
             template = st.selectbox(label="Template", options=templates)
