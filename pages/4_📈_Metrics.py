@@ -1,10 +1,51 @@
+import plotly.express as px
 import polars as pl
 import streamlit as st
 
 st.set_page_config(layout="wide")
 
 
-st.title("Statistics and Charts")
+st.title("Metrics and Statistical Correlation Between Incidents")
+
+
+def form_filename(keys: list[str], on: list[str]) -> str:
+    filename = "__".join(sorted(keys))
+    filename = f"data/{filename}.parquet"
+
+    return filename
+
+
+@st.cache_resource
+def load_stats(keys: list[str]) -> pl.DataFrame:
+    filename = form_filename(
+        keys=keys, on=["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
+    )
+
+    return pl.read_parquet(filename)
+
+
+@st.cache_resource
+def load_data(column: str) -> pl.DataFrame:
+    return pl.read_parquet(f"data/{column}.parquet")
+
+
+def draw_correlation(data: pl.DataFrame, template: str | None = None) -> None:
+    st.subheader(f"Correlation between incidents by {column}")
+    df_pandas = data.drop(column).to_pandas()
+    df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
+    corr = df_pandas.corr()  # type: ignore [assignment]
+    fig = px.imshow(corr, text_auto=True, aspect="auto", template=template)
+    st.plotly_chart(fig, theme="streamlit")
+
+
+with st.sidebar:
+    templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
+    choose_template = st.checkbox("Choose template?")
+    template = None
+    if choose_template:
+        template = st.selectbox(label="Template", options=templates)
+
+by = ["borough", "year"]
 
 
 COLUMN_VALUES = {
@@ -37,22 +78,6 @@ for i, column in enumerate(selectable_columns):
             inputs.pop(column)
 
 
-def form_filename(keys: list[str], on: list[str]) -> str:
-    filename = "__".join(sorted(keys))
-    filename = f"data/{filename}.parquet"
-
-    return filename
-
-
-@st.cache_resource
-def load_stats(keys: list[str]) -> pl.DataFrame:
-    filename = form_filename(
-        keys=keys, on=["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
-    )
-
-    return pl.read_parquet(filename)
-
-
 keys = list(inputs.keys())
 if len(keys) > 0:
     stats = load_stats(keys=keys)
@@ -71,14 +96,18 @@ if len(keys) > 0:
         with subcols[i]:
             st.metric(" ".join(col.split("_")).capitalize(), filtered[col].sum())
 
+st.header("Correlation")
 
-# st.header("Charts by a specific criteria")
+column = st.selectbox(label="Select", options=by)
 
-# count_columns = columns[:1] + columns[15:]
+data = load_data(column=column)
 
-# with st.expander("See charts"):
-#     column = st.selectbox("By criteria", count_columns)
-#     value_counts = data[column].drop_nulls().value_counts(sort=True)
-#     with st.container():
-#         chart = altair.Chart(value_counts).mark_circle().encode(x=column, y="count", size="count", color=column)
-#         st.altair_chart(altair_chart=chart)
+draw_correlation(data=data, template=template)
+
+with st.sidebar:
+    st.download_button(
+        label=f"Correlation data for {column}s",
+        data=data.to_pandas().to_csv(),
+        mime="text/csv",
+        file_name=f"correlation_{column}.csv",
+    )

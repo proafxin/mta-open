@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "mta-open"
-version = "1.1.0"
+version = "1.2.0"
 description = ""
 authors = ["Masum Billal <billalmasum93@gmail.com>"]
 license = "LICENSE"
@@ -20,6 +20,8 @@ scipy = "^1.14.1"
 streamlit-folium = "^0.23.1"
 pandas-stubs = "^2.2.3.241009"
 leafmap = "^0.38.5"
+geopandas = "^1.0.1"
+geodatasets = "^2024.8.0"
 
 [tool.ruff]
 line-length = 120

@@ -1,16 +1,14 @@
 import json
 
 import altair
-import pandas as pd
-import plotly.express as px
 import polars as pl
 import streamlit as st
 
 st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
-st.title("12 Years of New York Motor Vehicles Crash: Insights and Visualizations")
+st.title("12 Years of New York Motor Vehicles Crash: Statistics and Visualizations")
 
 ""
-st.header("Dashboards and Overall Metrics")
+st.header("Overall Insights")
 
 
 with open("data/metrics.json", mode="r") as f:
@@ -22,7 +20,7 @@ url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Cras
 altair.themes.enable("dark")
 
 
-col = st.columns((0.7, 1.5, 1), gap="small")
+col = st.columns((0.45, 1, 0.67), gap="small")
 
 
 def write_metric(label: str):
@@ -31,11 +29,6 @@ def write_metric(label: str):
 
 with st.sidebar:
     st.link_button("About Dataset", url=url)
-    templates = ["plotly", "ggplot2", "seaborn", "simple_white", "none"]
-    choose_template = st.checkbox("Choose template?")
-    template = None
-    if choose_template:
-        template = st.selectbox(label="Template", options=templates)
     st.subheader("Data Cleaning policy")
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
@@ -63,35 +56,35 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame], dict[str, pl.DataFrame]]:
+def calculate_metrics() -> tuple[dict, dict, dict, dict]:
     metrics: dict[str | int, dict] = {}
-    total: dict[str, dict[str, int | float]] = {}
-    correlations: dict[str, pl.DataFrame] = {}
-    cumulatives: dict[str, pl.DataFrame] = {}
+    averages: dict[str, dict[str, int | float]] = {}
+    minimums: dict[str, dict[str, tuple[str | int, int]]] = {}
+    maximums: dict[str, dict[str, tuple[str | int, int]]] = {}
+
     for column in by:
         data = load_metric(column=column)
 
-        cumulatives[column] = data.select(
-            pl.col(column),
-            pl.col("number_of_persons_killed").cum_sum(),
-            pl.col("number_of_persons_injured").cum_sum(),
-            pl.col("count").cum_sum(),
-        )
-        df_pandas = data.drop([column, "number_of_casualty"]).to_pandas()
-        df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
-        correlations[column] = df_pandas.corr()  # type: ignore [assignment]
-        total[column] = {}
+        averages[column] = {}
+        minimums[column] = {}
+        maximums[column] = {}
+
         for status in data.columns[1:]:
-            total[column][status] = int(data[status].sum()) / data[column].shape[0]
+            averages[column][status] = int(data[status].sum()) / data[column].shape[0]
+            sorted_data = data.select(column, status).sort(by=status)
+            min_row = sorted_data.row(0)
+            max_row = sorted_data.row(-1)
+            minimums[column][status] = min_row
+            maximums[column][status] = max_row
 
         for row in data.to_dicts():
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, total, correlations, cumulatives  # type: ignore
+    return metrics, averages, minimums, maximums  # type: ignore
 
 
-metrics, averages, correlations, cumulatives = calculate_metrics()
+metrics, averages, minimums, maximums = calculate_metrics()
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 years = range(2012, 2025)
@@ -99,11 +92,11 @@ years = range(2012, 2025)
 OPTIONS = {"borough": boroughs, "year": years}
 
 
-def draw_correlation(column: str) -> None:
-    st.subheader(f"Correlation between incidents by {column}")
-    corr = correlations[column]
-    fig = px.imshow(corr, text_auto=True, aspect="auto", template=template)
-    st.plotly_chart(fig, theme="streamlit")
+def min_max_metric(column: str, status: str) -> None:
+    value = minimums[column][status][0]
+    if isinstance(value, str):
+        value = " ".join([token.lower().capitalize() for token in value.split(" ")])
+    st.metric(label=f"{column.capitalize()} with least {status.replace("_", " ")}", value=value)
 
 
 with st.container():
@@ -111,7 +104,7 @@ with st.container():
         subcols = st.columns((1, 1), gap="small")
         with subcols[0]:
             write_metric("Total number of crashes")
-            write_metric("Crashes with time and location")
+            write_metric("Crashes with time, location")
             write_metric("Total killed")
             write_metric("Total injured")
 
@@ -139,23 +132,11 @@ with st.container():
                         delta=delta,
                         delta_color="inverse",
                     )
-            with subcols[-1]:
-                st.download_button(
-                    label=f"Correlation data for {column}s",
-                    data=correlations[column].to_csv(),
-                    mime="text/csv",
-                    file_name=f"correlation_{column}.csv",
-                )
 
     with col[2]:
-        draw_correlation(column="borough")
+        subcols = st.columns((1,) * len(by))
 
-
-with st.container():
-    st.subheader("Crashes and casualty over the years")
-    columns = ["number_of_persons_killed", "number_of_persons_injured", "count"]
-    chart = px.line(cumulatives["year"], x="year", y=columns, template=template)
-    chart2 = px.line(cumulatives["borough"], x="borough", y=columns, template=template)
-    st.plotly_chart(chart)
-    st.subheader("Crashes and casualty by boroughs")
-    st.plotly_chart(chart2)
+        for i, column in enumerate(by):
+            with subcols[i]:
+                for status in minimums[column]:
+                    min_max_metric(column=column, status=status)
