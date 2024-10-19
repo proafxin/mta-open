@@ -17,13 +17,8 @@ def form_mapfilename(col: str) -> str:
     return filename
 
 
-@st.cache_resource
-def load_map_data(col: str) -> pl.DataFrame:
-    return pl.read_parquet(form_mapfilename(col=col))
-
-
 COLOUR_RANGE = [[217, 20, 122, 200], [235, 100, 33, 200], [14, 166, 204, 200], [131, 28, 161, 200], [100, 10, 225, 220]]
-COLORS = ["#0044ff", "#ffaa00", "#00ff00", "#ff7f0e", "#2ca02c"]
+COLORS_CODE = ["#0044ff", "#ffaa00", "#00ff00", "#ff7f0e", "#2ca02c"]
 
 ALL_COLORS = [
     "gray",
@@ -67,8 +62,22 @@ class MapType(str, Enum):
     BAR = "Bar chart of incidents"
 
 
+@st.cache_resource
+def load_multiple_borough_maps(selected_boroughs: list[str]) -> pl.DataFrame:
+    data = []
+    for col in selected_boroughs:
+        filtered_data = pl.read_parquet(form_mapfilename(col=col))
+        filtered_data = filtered_data.filter(pl.col(option).eq(time))
+
+        data.append(filtered_data)
+    map_data = pl.concat(data)
+    map_data = pl.DataFrame(map_data)
+
+    return map_data
+
+
 with st.sidebar:
-    map_type = st.selectbox(label="Choose type", options=[MapType.GEOGRAPHICAL.value])
+    map_type = st.selectbox(label="Choose type", options=[MapType.GEOGRAPHICAL.value, MapType.HEATMAP.value])
 
 
 if map_type == MapType.GEOGRAPHICAL:
@@ -76,14 +85,8 @@ if map_type == MapType.GEOGRAPHICAL:
         time = st.slider(label=f"Pick a {option}", min_value=minimum, max_value=maximum, value=median)
         selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
 
-    data = []
-    for col in selected_boroughs:
-        filtered_data = load_map_data(col=col)
-        filtered_data = filtered_data.filter(pl.col(option).eq(time))
-        filtered_data = filtered_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
-        data.append(filtered_data)
-    map_data = pl.concat(data)
-    map_data = pl.DataFrame(map_data)
+    map_data = load_multiple_borough_maps(selected_boroughs=selected_boroughs)
+    map_data = map_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
     if map_data.shape[0] == 0:
         st.info(f"No data found for {selected_boroughs} on {time}")
     else:
@@ -102,3 +105,7 @@ if map_type == MapType.GEOGRAPHICAL:
         fl_map.fit_bounds([sw, ne])
 
         st_folium(fig=fl_map, use_container_width=True, returned_objects=[])
+elif map_type == MapType.HEATMAP.value:
+    map_data = load_multiple_borough_maps(selected_boroughs=boroughs)
+    map_data = map_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS_CODE).alias("color"))
+    st.map(data=map_data, latitude="latitude", longitude="longitud", size=2000, color="color")
