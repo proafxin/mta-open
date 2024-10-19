@@ -68,9 +68,7 @@ class MapType(str, Enum):
 
 
 with st.sidebar:
-    map_type = st.selectbox(
-        label="Choose type", options=[MapType.HEATMAP.value, MapType.GEOGRAPHICAL.value, MapType.BAR.value]
-    )
+    map_type = st.selectbox(label="Choose type", options=[MapType.GEOGRAPHICAL.value])
 
 
 if map_type == MapType.GEOGRAPHICAL:
