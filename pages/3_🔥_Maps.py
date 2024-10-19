@@ -58,7 +58,7 @@ minimum = date(day=1, month=7, year=2012)
 maximum = date(day=8, month=10, year=2024)
 median = date(day=1, month=7, year=2014)
 
-columns = ["number_of_persons_killed", "number_of_persons_injured", "count", "number_of_casualty"]
+columns = ["number_of_persons_killed", "number_of_persons_injured", "number_of_crash", "number_of_casualty"]
 columns_readable = [col.capitalize().replace("_", " ") for col in columns]
 COLUMN_MAP = {col1: col2 for col1, col2 in zip(columns_readable, columns)}
 
