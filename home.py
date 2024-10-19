@@ -8,7 +8,6 @@ st.set_page_config(page_title="NY Motor Vehicles Crash", layout="wide")
 st.title("12 Years of New York Motor Vehicles Crash: Statistics and Visualizations")
 
 ""
-st.header("High Level Statistics")
 
 
 with open("data/metrics.json", mode="r") as f:
@@ -29,22 +28,6 @@ def write_metric(label: str):
 
 with st.sidebar:
     st.link_button("About Dataset", url=url)
-    st.subheader("Data Cleaning policy")
-    text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
-    st.markdown(text)
-    st.markdown(
-        "* Null values are not considered e.g. if location is not present, the row is not considered for map plotting."
-    )
-    st.markdown(
-        "* Obviously, context matters. Not all columns are considered for null filtering. Street names and contributing factors can often be left empty."
-    )
-    st.markdown(
-        "* Locations are sometimes inaccurate. For example, there are coordinates with (0,0) values. These are considered **invalid**."
-    )
-    st.markdown(
-        "* 3 locations had distances more than 5 times the average and showed up outside the map. They were also considered invalid."
-    )
-    st.markdown("* Incorrectly labeled locations e.g. a crash occuring in Queens labeled as Bronx weren't discarded.")
 
 
 @st.cache_resource
@@ -116,6 +99,8 @@ with st.container():
             write_metric("Invalid markings")
 
     with col[1]:
+        with st.expander("Reveal the riskiest borough"):
+            st.text("Manhattan")
         for column in by:
             selected = st.selectbox(label=f"By {column}", options=OPTIONS[column])
             keys = list(averages["borough"].keys())
@@ -134,9 +119,36 @@ with st.container():
                     )
 
     with col[2]:
+        with st.expander("Reveal the safest borough"):
+            st.text("Staten Island")
         subcols = st.columns((1,) * len(by))
 
         for i, column in enumerate(by):
             with subcols[i]:
                 for status in minimums[column]:
                     min_max_metric(column=column, status=status)
+
+tabs = st.tabs(["Data Cleaning policy", "Risk Factor Calculation"])
+with tabs[0]:
+    text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
+    st.markdown(text)
+    st.markdown(
+        "* Null values are not considered e.g. if location is not present, the row is not considered for map plotting."
+    )
+    st.markdown(
+        "* Obviously, context matters. Not all columns are considered for null filtering. Street names and contributing factors can often be left empty."
+    )
+    st.markdown(
+        "* Locations are sometimes inaccurate. For example, there are coordinates with (0,0) values. These are considered **invalid**."
+    )
+    st.markdown(
+        "* 3 locations had distances more than 5 times the average and showed up outside the map. They were also considered invalid."
+    )
+    st.markdown("* Incorrectly labeled locations e.g. a crash occuring in Queens labeled as Bronx weren't discarded.")
+with tabs[1]:
+    st.markdown("* Number of casualty = Number of persons killed + Number of persons injured.")
+    st.markdown("* For per unit metric calculation, all factors are considered per 10000 square area units.")
+    st.markdown(
+        "* Example for number of persons killed. First, number of persons killed in a borough is divided by it's area then multiplied by 10000."
+    )
+    st.markdown("* Risk factor = number of crash per 10000 square units + number of casualty per 10000 square units.")

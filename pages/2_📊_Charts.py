@@ -33,6 +33,8 @@ def load_time_data(boroughs: list[str], option: str) -> pl.DataFrame:
 
 
 columns = ["number_of_crash", "number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
+columns_readable = [col.capitalize().replace("_", " ") for col in columns]
+COLUMN_MAP = {col1: col2 for col1, col2 in zip(columns_readable, columns)}
 
 
 @st.cache_resource
@@ -46,9 +48,6 @@ def load_cumulative(column: str) -> pl.DataFrame:
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 
-
-columns_readable = [col.capitalize().replace("_", " ") for col in columns]
-COLUMN_MAP = {col1: col2 for col1, col2 in zip(columns_readable, columns)}
 
 with st.sidebar:
     is_cumulative = st.checkbox("Cumulative data?")
@@ -109,20 +108,20 @@ else:
 
     data = load_time_data(boroughs=selected_boroughs, option=option)
     data = data.filter(pl.col(option).is_between(lower_bound=start_time, upper_bound=end_time))
+    column = COLUMN_MAP[selected_column]
 
     if reporting == ReportType.CHART.value:
         with st.sidebar:
             visualization = st.selectbox(
                 label="Visualize data as",
                 options=[
+                    VisualizationType.CIRCLE.value,
                     VisualizationType.BAR.value,
                     VisualizationType.LINE.value,
                     VisualizationType.POINT.value,
-                    VisualizationType.CIRCLE.value,
                     VisualizationType.AREA.value,
                 ],
             )
-        column = COLUMN_MAP[selected_column]
         if visualization == VisualizationType.LINE.value:
             px_chart = px.line(data_frame=data, x=option, y=column, color="borough", template=template)
         elif visualization == VisualizationType.AREA.value:
