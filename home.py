@@ -63,20 +63,13 @@ by = ["borough", "year"]
 
 
 @st.cache_resource
-def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame], dict[str, pl.DataFrame]]:
+def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame]]:
     metrics: dict[str | int, dict] = {}
     total: dict[str, dict[str, int | float]] = {}
     correlations: dict[str, pl.DataFrame] = {}
-    cumulatives: dict[str, pl.DataFrame] = {}
     for column in by:
         data = load_metric(column=column)
 
-        cumulatives[column] = data.select(
-            pl.col(column),
-            pl.col("number_of_persons_killed").cum_sum(),
-            pl.col("number_of_persons_injured").cum_sum(),
-            pl.col("count").cum_sum(),
-        )
         df_pandas = data.drop([column, "number_of_casualty"]).to_pandas()
         df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
         correlations[column] = df_pandas.corr()  # type: ignore [assignment]
@@ -88,10 +81,10 @@ def calculate_metrics() -> tuple[dict, dict, dict[str, pd.DataFrame], dict[str, 
             key = row.pop(column)
             metrics[key] = row
 
-    return metrics, total, correlations, cumulatives  # type: ignore
+    return metrics, total, correlations  # type: ignore
 
 
-metrics, averages, correlations, cumulatives = calculate_metrics()
+metrics, averages, correlations = calculate_metrics()
 
 boroughs = ["BRONX", "QUEENS", "BROOKLYN", "MANHATTAN", "STATEN ISLAND"]
 years = range(2012, 2025)
@@ -149,13 +142,3 @@ with st.container():
 
     with col[2]:
         draw_correlation(column="borough")
-
-
-with st.container():
-    st.subheader("Crashes and casualty over the years")
-    columns = ["number_of_persons_killed", "number_of_persons_injured", "count"]
-    chart = px.line(cumulatives["year"], x="year", y=columns, template=template)
-    chart2 = px.line(cumulatives["borough"], x="borough", y=columns, template=template)
-    st.plotly_chart(chart)
-    st.subheader("Crashes and casualty by boroughs")
-    st.plotly_chart(chart2)

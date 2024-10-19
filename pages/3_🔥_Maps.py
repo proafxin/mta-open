@@ -1,4 +1,5 @@
 from datetime import date
+from enum import Enum
 
 import folium
 import folium.map
@@ -7,9 +8,6 @@ import streamlit as st
 from streamlit_folium import st_folium
 
 st.set_page_config(layout="wide")
-
-
-st.title("Map of crashes by date")
 
 
 def form_mapfilename(col: str) -> str:
@@ -62,21 +60,30 @@ minimum = date(day=1, month=7, year=2012)
 maximum = date(day=8, month=10, year=2024)
 median = date(day=1, month=7, year=2014)
 
+
+class MapType(str, Enum):
+    HEATMAP = "Heatmap"
+    GEOGRAPHICAL = "Geographical Map"
+    BAR = "Bar chart of incidents"
+
+
 with st.sidebar:
-    time = st.slider(label=f"Pick a {option}", min_value=minimum, max_value=maximum, value=median)
-    selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
-
-map_state = st.text(f"Loading map of crashes by {option} = {time}...")  # type: ignore [str-bytes-safe]
-
-data = []
-for col in selected_boroughs:
-    filtered_data = load_map_data(col=col)
-    filtered_data = filtered_data.filter(pl.col(option).eq(time))
-    filtered_data = filtered_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
-    data.append(filtered_data)
+    map_type = st.selectbox(
+        label="Choose type", options=[MapType.HEATMAP.value, MapType.GEOGRAPHICAL.value, MapType.BAR.value]
+    )
 
 
-with st.container():
+if map_type == MapType.GEOGRAPHICAL:
+    with st.sidebar:
+        time = st.slider(label=f"Pick a {option}", min_value=minimum, max_value=maximum, value=median)
+        selected_boroughs = st.multiselect("Which boroughs do you want to check?", boroughs, boroughs[:])
+
+    data = []
+    for col in selected_boroughs:
+        filtered_data = load_map_data(col=col)
+        filtered_data = filtered_data.filter(pl.col(option).eq(time))
+        filtered_data = filtered_data.with_columns(pl.col("borough").str.replace_many(boroughs, COLORS).alias("color"))
+        data.append(filtered_data)
     map_data = pl.concat(data)
     map_data = pl.DataFrame(map_data)
     if map_data.shape[0] == 0:
@@ -88,19 +95,9 @@ with st.container():
         for row in map_data.to_dicts():
             folium.Marker(
                 location=row["coordinate"],
-                popup=folium.Popup(html=row["borough"], parse_html=True),
-                tooltip=f"({row["latitude"]}, {row["longitude"]})",
+                popup=f"Borough: {row["borough"]}",
+                tooltip=f"Location: ({row["latitude"]}, {row["longitude"]})",
                 icon=folium.Icon(color=color_map[row["borough"]], icon="angle"),
             ).add_to(fl_map)
-        # HeatMapWithTime(data=map_data.drop("coordinate", "date", "borough")).add_to(fl_map)
 
-        st_folium(fig=fl_map, use_container_width=True)
-
-        # leaf = lm.Map(center=center)
-        # st.write(map_data.head())
-
-        # leaf.add_heatmap(data=map_data, latitude="latitude", longitude="longitude")
-        # leaf.to_streamlit()
-
-
-map_state.text(f"Loading map of crashes by {option} = {time}...DONE!")  # type: ignore [str-bytes-safe]
+        st_folium(fig=fl_map, use_container_width=True, returned_objects=[])
