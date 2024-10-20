@@ -3,6 +3,7 @@ from enum import Enum
 
 import branca.colormap as cm
 import folium
+import folium.features
 import folium.map
 import geopandas as gpd
 import pandas as pd
@@ -141,7 +142,7 @@ if map_type == MapType.GEOGRAPHICAL:
 
         st_folium(fig=fl_map, use_container_width=True, returned_objects=[])
 elif map_type == MapType.HEATMAP.value:
-    cmap = None
+    cmap = "Reds"
     cmaps = list(set(cmap.split("_")[0] for cmap in cm.linear._colormaps))
     with st.sidebar:
         choose_cm = st.checkbox("Choose color map?")
@@ -158,16 +159,23 @@ elif map_type == MapType.HEATMAP.value:
     folium.TileLayer(tiles="OpenStreetMap", name="Light Map", control=False).add_to(fl_map)
     myscale = (borough_data[column].quantile((0, 0.1, 0.75, 0.9, 0.98, 1))).tolist()  # type: ignore
 
-    folium.Choropleth(
-        geo_data=geo_data,
-        data=borough_data,
-        columns=["code", column],
-        key_on="feature.properties.code",
-        fill_color=cmap,
-        legend_name=f"{column.replace("_", " ").capitalize()}",
-        fill_opacity=1,
-        line_opacity=0.2,
-    ).add_to(fl_map)
+    merged = geo_data.merge(borough_data, on=["code"])
+    schemes = [
+        "BoxPlot",
+        "EqualInterval",
+        "FisherJenks",
+        "HeadTailBreaks",
+        "JenksCaspall",
+        "JenksCaspallForced",
+        "MaximumBreaks",
+        "NaturalBreaks",
+        "Quantiles",
+        "Percentiles",
+        "StdMean",
+    ]
+    with st.sidebar:
+        scheme = st.selectbox(label="Select scheme", options=schemes, index=1)
 
-    folium.LayerControl().add_to(fl_map)
-    st_folium(fl_map, use_container_width=True, returned_objects=[])
+    m = merged.explore(column, cmap=cmap, scheme=scheme)
+    m.fit_bounds(m.get_bounds())
+    st_folium(m, use_container_width=True, returned_objects=[])
