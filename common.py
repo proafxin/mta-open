@@ -57,3 +57,4 @@ def persist_data_bitmask(data: pl.DataFrame, by: list[str], on: list[str]) -> No
 MINIMUMS = {"date": date(day=1, month=7, year=2012), "year": 2012, "month": 1, "hour": 0}
 MAXIMUMS = {"date": date(day=8, month=10, year=2024), "year": 2024, "month": 12, "hour": 23}
 MEDIANS = {"date": date(day=1, month=7, year=2014), "year": 2014, "month": 7, "hour": 12}
+NY_CENTER = (40.71261963846181, -73.95064260553615)

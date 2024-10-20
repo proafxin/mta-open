@@ -24,6 +24,9 @@ with tabs[0]:
         label="New York City Population By Borough",
         url="https://data.cityofnewyork.us/City-Government/New-York-City-Population-by-Borough-1950-2040/xywu-7bv9/data",
     )
+    st.link_button(
+        label="State zip codes of USA states boundaries", url="https://github.com/OpenDataDE/State-zip-code-GeoJSON"
+    )
 with tabs[1]:
     text = "There are many data points that are not properly labeled. Here are the policies used to clean this data."
     st.markdown(text)
@@ -37,7 +40,7 @@ with tabs[1]:
         "* Locations are sometimes inaccurate. For example, there are coordinates with (0,0) values. These are considered **invalid**."
     )
     st.markdown(
-        "* 3 locations had distances more than 5 times the average and showed up outside the map. They were also considered invalid."
+        "* <10 locations had distances more than 3-5 times the average and showed up outside the map of New York. They were also considered invalid."
     )
     st.markdown("* Incorrectly labeled locations e.g. a crash occuring in Queens labeled as Bronx weren't discarded.")
 with tabs[2]:
