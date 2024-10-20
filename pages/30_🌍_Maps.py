@@ -1,6 +1,7 @@
 from datetime import date
 from enum import Enum
 
+import branca.colormap as cm
 import folium
 import folium.map
 import geopandas as gpd
@@ -140,6 +141,12 @@ if map_type == MapType.GEOGRAPHICAL:
 
         st_folium(fig=fl_map, use_container_width=True, returned_objects=[])
 elif map_type == MapType.HEATMAP.value:
+    cmap = None
+    cmaps = list(set(cmap.split("_")[0] for cmap in cm.linear._colormaps))
+    with st.sidebar:
+        choose_cm = st.checkbox("Choose color map?")
+        if choose_cm:
+            cmap = st.selectbox(label="Select color map", options=cmaps, index=len(cmaps) - 16)
     selected_column = st.selectbox("Generate heatmap for", COLUMN_MAP.keys())
     column = COLUMN_MAP[selected_column]
 
@@ -148,7 +155,7 @@ elif map_type == MapType.HEATMAP.value:
     # geo_data["color"] = geo_data["borough"].apply(lambda x: color_map[x.upper()])
 
     fl_map = folium.Map(location=(40.71261963846181, -73.95064260553615), zoom_start=10.4, tiles=None)
-    folium.TileLayer("CartoDB positron", name="Light Map", control=False).add_to(fl_map)
+    folium.TileLayer(tiles="OpenStreetMap", name="Light Map", control=False).add_to(fl_map)
     myscale = (borough_data[column].quantile((0, 0.1, 0.75, 0.9, 0.98, 1))).tolist()  # type: ignore
 
     folium.Choropleth(
@@ -156,7 +163,7 @@ elif map_type == MapType.HEATMAP.value:
         data=borough_data,
         columns=["code", column],
         key_on="feature.properties.code",
-        # fill_color="YlGnBu",
+        fill_color=cmap,
         legend_name=f"{column.replace("_", " ").capitalize()}",
         fill_opacity=1,
         line_opacity=0.2,
