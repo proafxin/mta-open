@@ -35,7 +35,7 @@ st.markdown(
 )
 st.markdown("*`number_of_casualty = number_of_persons_killed+number_of_persons_injured`")
 
-st.header("Number of Null Values For Each Column")
+st.header("Number of Missing Values For Each Column")
 null_count = data.null_count()
 columns = null_count.columns
 st.write(null_count)
@@ -46,7 +46,7 @@ st.bar_chart(
     color="columns",
     use_container_width=True,
     height=300,
-    y_label="Null count",
+    y_label="Values missing",
 )
 st.header("What time of the day is the riskiest?")
 hour_counts = data["hour"].value_counts().sort(by=["count"])
