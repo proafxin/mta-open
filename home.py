@@ -9,7 +9,7 @@ st.title("12 Years of New York Motor Vehicles Crash: Statistics and Interactive 
 
 st.header("What This Application Is")
 st.markdown(
-    "For the area and population New York has, the number of crashes that occurs is conspicuously flagrant. This application is a comprehensive collection of statistical dashboards, metrics and interactive visualizations on New York's last 12 years worth of motor vehicle crash data. The primary objective is to provide actionable intelligence to reduce the number of crashes and mitigate the impact as much as possible."
+    "For the area and population New York has, the number of crashes that occur is conspicuously flagrant. This application is a comprehensive collection of statistical dashboards, metrics and interactive visualizations on New York's last 12 years worth of motor vehicle crash data. The primary objective is to provide actionable intelligence to reduce the number of crashes and mitigate the impact as much as possible."
 )
 st.markdown("Some usecases of this application include but are not limited to")
 st.markdown("* Providing subjectively unbiased insights into these crashes.")
