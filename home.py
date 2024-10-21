@@ -7,6 +7,25 @@ st.title("12 Years of New York Motor Vehicles Crash: Statistics and Interactive 
 ""
 
 
+st.header("What This Application Is")
+st.markdown(
+    "For the area and population New York has, the number of crashes that occurs is conspicuously flagrant. This application is a comprehensive collection of statistical dashboards, metrics and interactive visualizations on New York's last 12 years worth of motor vehicle crash data. The primary objective is to provide actionable intelligence to reduce the number of crashes and mitigate the impact as much as possible."
+)
+st.markdown("Some usecases of this application include but are not limited to")
+st.markdown("* Providing subjectively unbiased insights into these crashes.")
+st.markdown("* Determining safest and riskiest locations based on reasonable metrics dependent on geography.")
+st.markdown(
+    "* Features to checkout statistics and metrics juxtaposed with the user's custom parameters by the date, location and time of the user's choosing."
+)
+st.markdown("* Allowing the user to interact with the data and visualize them using charts and maps.")
+st.markdown(
+    "* Providing the user with the statistical data  directly in case they want to analyze it themselves and draw their own conclusions."
+)
+
+st.header("Challenges Faced")
+st.markdown("* How to calculate an unbiased risk factor?")
+st.markdown("* ")
+
 url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95/about_data"
 
 

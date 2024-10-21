@@ -22,12 +22,16 @@ pandas-stubs = "^2.2.3.241009"
 leafmap = "^0.38.5"
 geopandas = "^1.0.1"
 geodatasets = "^2024.8.0"
+folium = "^0.17.0"
+matplotlib = "^3.9.2"
+mapclassify = "^2.8.1"
+pandas = "^2.2.3"
 
 [tool.ruff]
 line-length = 120
 
 [[tool.mypy.overrides]]
-module = ["geopandas", "plotly.*", "plotly", "pydeck", "folium", "folium.*", "streamlit_folium", "leafmap", "leafmap.*"]
+module = ["geopandas", "plotly.*", "plotly", "pydeck", "folium", "folium.*", "streamlit_folium", "leafmap", "leafmap.*", "branca.*"]
 ignore_missing_imports = true
 
 [build-system]
