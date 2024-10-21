@@ -25,6 +25,7 @@ geodatasets = "^2024.8.0"
 folium = "^0.17.0"
 matplotlib = "^3.9.2"
 mapclassify = "^2.8.1"
+pandas = "^2.2.3"
 
 [tool.ruff]
 line-length = 120
