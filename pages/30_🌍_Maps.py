@@ -127,12 +127,12 @@ if map_type == MapType.GEOGRAPHICAL:
         folium.TileLayer(tiles="OpenStreetMap").add_to(fl_map)
 
         for row in map_data.to_dicts():
-            tooltip = f"Location: ({row["latitude"]}, {row["longitude"]})"
+            tooltip = f"""Location: ({row["latitude"]}, {row["longitude"]})"""
             for col in columns[1:]:
-                tooltip += f", {col.replace("_", " ").capitalize()}: {row[col]}"
+                tooltip += f""", {col.replace("_", " ").capitalize()}: {row[col]}"""
             folium.Marker(
                 location=row["coordinate"],
-                popup=f"{value_counts[row['borough']]} crashes in {row["borough"]}",
+                popup=f"""{value_counts[row['borough']]} crashes in {row["borough"]}""",
                 tooltip=tooltip,
                 icon=folium.Icon(color=color_map[row["borough"]], icon="angle"),
             ).add_to(fl_map)

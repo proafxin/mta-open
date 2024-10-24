@@ -20,14 +20,6 @@ class Incident(str, Enum):
 options = [Option.DATE.value, Option.YEAR.value, Option.MONTH.value, Option.HOUR.value]
 
 
-def form_mapfilename(cols: list[str]) -> str:
-    cols = sorted(cols)
-    cols = [col.lower().strip().replace(" ", "_") for col in cols]
-    filename = f"data/maps/{"__".join(cols)}.parquet"
-
-    return filename
-
-
 def form_filename(keys: list[str], on: list[str]) -> str:
     filename = "__".join(sorted(keys))
     filename = f"data/{filename}.parquet"

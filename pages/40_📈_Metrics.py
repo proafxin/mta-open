@@ -52,15 +52,6 @@ def load_borough_metrics() -> pl.DataFrame:
     return pl.read_parquet("data/per_unit.parquet")
 
 
-def draw_correlation(data: pl.DataFrame, template: str | None = None) -> None:
-    st.subheader(f"Correlation between incidents by {column}")
-    df_pandas = data.drop(column).to_pandas()
-    df_pandas.columns = [col.split("_")[-1].capitalize() for col in df_pandas.columns]  # type: ignore
-    corr = df_pandas.corr()  # type: ignore [assignment]
-    fig = px.imshow(corr, text_auto=True, aspect="auto", template=template)
-    st.plotly_chart(fig, theme="streamlit")
-
-
 by = ["borough", "year"]
 
 
@@ -142,17 +133,6 @@ with st_cols[0]:
         if "px_chart" in locals():
             st.plotly_chart(px_chart)
 
-with st_cols[1]:
-    st.header("Correlation")
-
-    column = st.selectbox(label="Select", options=by)
-
-    data = load_data(column=column)
-
-    if reporting == ReportType.CHART.value:
-        draw_correlation(data=data, template=template)
-    else:
-        st.write(data)
 
 st.header("Statistics by Multiple Criteria")
 
@@ -206,9 +186,9 @@ with st.sidebar:
         file_name=filename,
         mime="text/csv",
     )
-    st.download_button(
-        label=f"Download correlation data for {column}s",
-        data=data.to_pandas().to_csv(),
-        mime="text/csv",
-        file_name=f"correlation_{column}.csv",
-    )
+    # st.download_button(
+    #     label=f"Download correlation data for {column}s",
+    #     data=data.to_pandas().to_csv(),
+    #     mime="text/csv",
+    #     file_name=f"correlation_{column}.csv",
+    # )

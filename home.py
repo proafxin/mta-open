@@ -22,9 +22,6 @@ st.markdown(
     "* Providing the user with the statistical data  directly in case they want to analyze it themselves and draw their own conclusions."
 )
 
-st.header("Challenges Faced")
-st.markdown("* How to calculate an unbiased risk factor?")
-st.markdown("* ")
 
 url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Crashes/h9gi-nx95/about_data"
 
