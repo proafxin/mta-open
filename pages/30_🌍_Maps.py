@@ -1,4 +1,3 @@
-import math
 from datetime import date
 from enum import Enum
 
@@ -110,18 +109,6 @@ geo_data = load_geo_data()
 rows = geo_data.drop("geometry", axis=1).to_dict("records")
 
 
-def load_centers(fl_map: folium.Map) -> None:
-    columns = geo_data.columns[:-2]
-    for row in rows:
-        center = row["center"]
-        location = (center.y, center.x)
-        tooltip = ", ".join([f"""{col.replace("_", " ").capitalize()}: {row[col]}""" for col in columns])
-        radius = math.sqrt(row["length"] / 100)
-        folium.CircleMarker(
-            location=location, radius=radius, popup=tooltip, tooltip=tooltip, fill_color="black", opacity=0.4
-        ).add_to(fl_map)
-
-
 with st.sidebar:
     map_type = st.selectbox(label="Choose type", options=[MapType.GEOGRAPHICAL.value, MapType.HEATMAP.value])
 
@@ -143,7 +130,6 @@ if map_type == MapType.GEOGRAPHICAL:
         center = (map_data["latitude"].mean(), map_data["longitude"].mean())
         fl_map = folium.Map(location=center, tiles=None, zoom_start=15)
         folium.TileLayer(tiles="OpenStreetMap").add_to(fl_map)
-        load_centers(fl_map=fl_map)
 
         for row in map_data.to_dicts():
             tooltip = f"""Location: ({row["latitude"]}, {row["longitude"]})"""
@@ -173,8 +159,7 @@ elif map_type == MapType.HEATMAP.value:
     borough_data = load_borough_data()
     # geo_data["color"] = geo_data["borough"].apply(lambda x: color_map[x.upper()])
 
-    fl_map = folium.Map(location=(40.71261963846181, -73.95064260553615), zoom_start=10.4, tiles=None)
-    load_centers(fl_map=fl_map)
+    fl_map = folium.Map(location=(40.71261963846181, -73.95064260553615), zoom_start=15, tiles=None)
     folium.TileLayer(tiles="OpenStreetMap", name="Light Map", control=False).add_to(fl_map)
     myscale = (borough_data[column].quantile((0, 0.1, 0.75, 0.9, 0.98, 1))).tolist()  # type: ignore
 
