@@ -29,7 +29,7 @@ url = "https://data.cityofnewyork.us/Public-Safety/Motor-Vehicle-Collisions-Cras
 altair.themes.enable("dark")
 
 
-tabs = st.tabs(["Learn More About Dataset", "Data Cleaning policy", "Risk Factor Calculation"])
+tabs = st.tabs(["Learn More About Dataset", "Data Cleaning policy"])
 with tabs[0]:
     st.link_button(label="New York Motor Vehicles Collisions and Crashes, Public Safety by NYPD", url=url)
     st.link_button(
@@ -59,10 +59,3 @@ with tabs[1]:
         "* <10 locations had distances more than 3-5 times the average and showed up outside the map of New York. They were also considered invalid."
     )
     st.markdown("* Incorrectly labeled locations e.g. a crash occuring in Queens labeled as Bronx weren't discarded.")
-with tabs[2]:
-    st.markdown("* Number of casualty = Number of persons killed + Number of persons injured.")
-    st.markdown("* For per unit metric calculation, all factors are considered per 10000 square area units.")
-    st.markdown(
-        "* Example for number of persons killed. First, number of persons killed in a borough is divided by it's area then multiplied by 10000."
-    )
-    st.markdown("* Risk factor = number of crash per 10000 square units + number of casualty per 10000 square units.")

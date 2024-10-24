@@ -9,7 +9,7 @@ from plotly.io import templates
 st.set_page_config(layout="wide")
 
 
-st.title("Metrics and Statistical Correlation")
+st.title("Statistics by Area and Multiple Criteria")
 
 
 class ReportType(str, Enum):
@@ -85,13 +85,7 @@ borough_metrics = borough_metrics.with_columns(
     pl.sum_horizontal("number_of_casualty", "number_of_crash").alias("risk_factor")
 )
 
-columns = [
-    "number_of_crash",
-    "number_of_persons_killed",
-    "number_of_persons_injured",
-    "number_of_casualty",
-    "risk_factor",
-]
+columns = ["number_of_crash", "number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
 columns_readable = [col.capitalize().replace("_", " ") for col in columns]
 COLUMN_MAP = {col1: col2 for col1, col2 in zip(columns_readable, columns)}
 
@@ -131,6 +125,7 @@ with st_cols[0]:
             ).interactive()
             st.altair_chart(alt_chart, use_container_width=True)
         if "px_chart" in locals():
+            px_chart.update_layout(yaxis_title=column.capitalize().replace("_", " "))
             st.plotly_chart(px_chart)
 
 
