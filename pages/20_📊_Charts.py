@@ -88,7 +88,7 @@ if is_cumulative:
     with st.sidebar:
         filename = f"cumulative_{by}_{column}.csv"
         st.download_button(
-            label=f"Download cumulative data of {by} by {column.replace("_", " ")}",
+            label=f"""Download cumulative data of {by} by {column.replace("_", " ")}""",
             data=data.to_pandas().to_csv(),
             mime="text/csv",
             file_name=filename,

@@ -1,3 +1,4 @@
+import math
 from datetime import date
 from enum import Enum
 
@@ -104,6 +105,23 @@ def load_borough_data() -> pd.DataFrame:
     return data
 
 
+geo_data = load_geo_data()
+
+rows = geo_data.drop("geometry", axis=1).to_dict("records")
+
+
+def load_centers(fl_map: folium.Map) -> None:
+    columns = geo_data.columns[:-2]
+    for row in rows:
+        center = row["center"]
+        location = (center.y, center.x)
+        tooltip = ", ".join([f"""{col.replace("_", " ").capitalize()}: {row[col]}""" for col in columns])
+        radius = math.sqrt(row["length"] / 100)
+        folium.CircleMarker(
+            location=location, radius=radius, popup=tooltip, tooltip=tooltip, fill_color="black", opacity=0.4
+        ).add_to(fl_map)
+
+
 with st.sidebar:
     map_type = st.selectbox(label="Choose type", options=[MapType.GEOGRAPHICAL.value, MapType.HEATMAP.value])
 
@@ -125,20 +143,21 @@ if map_type == MapType.GEOGRAPHICAL:
         center = (map_data["latitude"].mean(), map_data["longitude"].mean())
         fl_map = folium.Map(location=center, tiles=None, zoom_start=15)
         folium.TileLayer(tiles="OpenStreetMap").add_to(fl_map)
+        load_centers(fl_map=fl_map)
 
         for row in map_data.to_dicts():
-            tooltip = f"Location: ({row["latitude"]}, {row["longitude"]})"
+            tooltip = f"""Location: ({row["latitude"]}, {row["longitude"]})"""
             for col in columns[1:]:
-                tooltip += f", {col.replace("_", " ").capitalize()}: {row[col]}"
+                tooltip += f""", {col.replace("_", " ").capitalize()}: {row[col]}"""
             folium.Marker(
                 location=row["coordinate"],
-                popup=f"{value_counts[row['borough']]} crashes in {row["borough"]}",
+                popup=f"""{value_counts[row['borough']]} crashes in {row["borough"]}""",
                 tooltip=tooltip,
                 icon=folium.Icon(color=color_map[row["borough"]], icon="angle"),
             ).add_to(fl_map)
         sw = list(map_data.select("latitude", "longitude").min().to_numpy()[0])
         ne = list(map_data.select("latitude", "longitude").max().to_numpy()[0])
-        fl_map.fit_bounds([sw, ne])
+        fl_map.fit_bounds(fl_map.get_bounds())
 
         st_folium(fig=fl_map, use_container_width=True, returned_objects=[])
 elif map_type == MapType.HEATMAP.value:
@@ -151,11 +170,11 @@ elif map_type == MapType.HEATMAP.value:
     selected_column = st.selectbox("Generate heatmap for", COLUMN_MAP.keys())
     column = COLUMN_MAP[selected_column]
 
-    geo_data = load_geo_data()
     borough_data = load_borough_data()
     # geo_data["color"] = geo_data["borough"].apply(lambda x: color_map[x.upper()])
 
     fl_map = folium.Map(location=(40.71261963846181, -73.95064260553615), zoom_start=10.4, tiles=None)
+    load_centers(fl_map=fl_map)
     folium.TileLayer(tiles="OpenStreetMap", name="Light Map", control=False).add_to(fl_map)
     myscale = (borough_data[column].quantile((0, 0.1, 0.75, 0.9, 0.98, 1))).tolist()  # type: ignore
 
