@@ -39,8 +39,7 @@ def load_processed_data() -> pl.DataFrame:
 
 @st.cache_resource
 def load_clean_data() -> pl.DataFrame:
-    data = pl.read_parquet("data/clean_data.parquet")
-    data = data.with_columns(pl.col("borough").replace(BOROUGH_CODES).alias("code"))
+    data = pl.read_parquet("data/merged.parquet")
 
     return data
 
@@ -184,6 +183,7 @@ st.write(
 
 geo_data = load_geo_data()
 
+st.write(geo_data)
 
 st.header("Cleaned Data")
 clean = load_clean_data()
@@ -217,8 +217,3 @@ with st.sidebar:
         choose_template = st.checkbox("Choose template?")
         if choose_template:
             template = st.selectbox(label="Template", options=templates)
-
-if reporting == ReportType.CHART.value:
-    draw_correlation(data=clean.select(metric_cols), template=template)
-else:
-    st.write(data.head())

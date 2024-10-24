@@ -4,6 +4,12 @@ from enum import Enum
 import polars as pl
 
 
+def form_mapfilename(cols: list[str]) -> str:
+    filename = f"""data/maps/{"__".join([col.lower().strip().replace(" ", "_") for col in cols])}.parquet"""
+
+    return filename
+
+
 class Option(str, Enum):
     YEAR = "year"
     MONTH = "month"
