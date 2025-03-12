@@ -17,7 +17,9 @@ class ReportType(str, Enum):
     FILE_DOWNLOAD = "Download full data"
 
 
-def draw_correlation(data: pl.DataFrame, column: str | None = None, template: str | None = None) -> None:
+def draw_correlation(
+    data: pl.DataFrame, column: str | None = None, template: str | None = None
+) -> None:
     if column:
         st.subheader(f"Correlation between incidents by {column}")
         data = data.drop(column)
@@ -56,7 +58,9 @@ def load_geo_data() -> gpd.GeoDataFrame:
 @st.cache_resource
 def load_borough_data() -> pl.DataFrame:
     data = pl.read_parquet("data/borough.parquet")
-    data = data.with_columns((pl.col("number_of_casualty") / pl.col("number_of_crash")).alias("risk_factor"))
+    data = data.with_columns(
+        (pl.col("number_of_casualty") / pl.col("number_of_crash")).alias("risk_factor")
+    )
 
     return data
 
@@ -68,7 +72,9 @@ borough_data = load_borough_data()
 @st.cache_resource
 def donut(cols: list[str], legendgroup: int = 1) -> go.Pie:
     donut = pl.DataFrame({col: data[col].sum() for col in cols})
-    donut = donut.with_columns(pl.col(cols[0]).sub(pl.sum_horizontal(cols[1:])).alias(f"{cols[0]}_in_vehicle"))
+    donut = donut.with_columns(
+        pl.col(cols[0]).sub(pl.sum_horizontal(cols[1:])).alias(f"{cols[0]}_in_vehicle")
+    )
     donut = donut.drop(cols[0])
 
     return go.Pie(
@@ -84,7 +90,9 @@ def donut(cols: list[str], legendgroup: int = 1) -> go.Pie:
 
 @st.cache_resource
 def donuts() -> go.Figure:
-    fig = make_subplots(rows=1, cols=2, specs=[[{"type": "domain"}, {"type": "domain"}]])
+    fig = make_subplots(
+        rows=1, cols=2, specs=[[{"type": "domain"}, {"type": "domain"}]]
+    )
     pie1 = donut(
         cols=[
             "number_of_persons_injured",
@@ -111,7 +119,10 @@ def donuts() -> go.Figure:
 
 
 with st.sidebar:
-    reporting = st.selectbox(label="Output type", options=[ReportType.CHART.value, ReportType.DATAFRAME.value])
+    reporting = st.selectbox(
+        label="Output type",
+        options=[ReportType.CHART.value, ReportType.DATAFRAME.value],
+    )
 
     if reporting == ReportType.CHART.value:
         template = None
@@ -120,9 +131,13 @@ with st.sidebar:
             template = st.selectbox(label="Template", options=templates)
 
 st.header("Raw Data")
-st.markdown("This section displays the top 5 rows of the raw data after some processing.")
+st.markdown(
+    "This section displays the top 5 rows of the raw data after some processing."
+)
 st.write(data.head())
-st.write("Numer of entries in data:", data.shape[0], "Number of factors:", data.shape[1])
+st.write(
+    "Numer of entries in data:", data.shape[0], "Number of factors:", data.shape[1]
+)
 st.markdown("As you can see, there are some modifications in this data.")
 st.markdown(
     "* `date` and `time` are the columns `crash_date` and `crash_time` with appropriate date and time types respectively."
@@ -130,12 +145,16 @@ st.markdown(
 st.markdown(
     "* `year`, `month`, `weekday` and `hour` columns are extracted from existing `date` and `time` columns. `weekday` starts at Monday (1) and ends in Sunday (7)."
 )
-st.markdown("* `number_of_casualty = number_of_persons_killed+number_of_persons_injured`")
+st.markdown(
+    "* `number_of_casualty = number_of_persons_killed+number_of_persons_injured`"
+)
 st.markdown("* `code` is a unique mapping for boroughs.")
 st.markdown(
     "* Columns involving vehicle factors such as `contributing_factor_vehicle_1` and `vehicle_type_code_1` are removed because they have too many missing values."
 )
-st.markdown("* `on_street_name`, `cross_street_name` and `off_street_name` are removed for the same reason.")
+st.markdown(
+    "* `on_street_name`, `cross_street_name` and `off_street_name` are removed for the same reason."
+)
 
 st.header("Number of Missing Values For Each Column")
 null_count = data.null_count()
@@ -143,7 +162,9 @@ columns = null_count.columns
 
 if reporting == ReportType.CHART.value:
     chart = px.bar(
-        data_frame=pl.DataFrame({"columns": columns, "null_count": null_count.transpose()}),
+        data_frame=pl.DataFrame(
+            {"columns": columns, "null_count": null_count.transpose()}
+        ),
         x="columns",
         y="null_count",
         color="columns",
@@ -170,13 +191,20 @@ st.plotly_chart(donut_chart)
 st.write(
     "As we can see, the number of victims is the lowest for people inside the vehicles consistently where motor cyclists and pedestrians fall to these accidents the most. They make up more than 90 percent of the victims on average."
 )
-st.write("We also see that a pedestrian is more likely to die in a crash than other people involved.")
+st.write(
+    "We also see that a pedestrian is more likely to die in a crash than other people involved."
+)
 
 st.header("What time of the day is the riskiest?")
 hour_counts = data["hour"].value_counts().sort(by=["count"])
 weekday_counts = data["weekday"].value_counts().sort(by=["count"])
 
-metric_cols = ["number_of_persons_killed", "number_of_persons_injured", "number_of_casualty", "number_of_crash"]
+metric_cols = [
+    "number_of_persons_killed",
+    "number_of_persons_injured",
+    "number_of_casualty",
+    "number_of_crash",
+]
 
 hour_cols = st.columns((1,) * 2, gap="small")
 with st.sidebar:
@@ -189,7 +217,14 @@ with st.sidebar:
 if reporting == ReportType.DATAFRAME.value:
     st.write(hour_counts)
 else:
-    st.bar_chart(data=hour_counts, x="hour", y="count", height=400, color="hour", y_label="Crash count by hour")
+    st.bar_chart(
+        data=hour_counts,
+        x="hour",
+        y="count",
+        height=400,
+        color="hour",
+        y_label="Crash count by hour",
+    )
 st.write(
     "It is safe to say 1-6 AM e.g. night time are the safest to drive as these 6 hours have the lowest 6 counts of crashes. On the other hand, 4-5 PM are the riskiest with the highest counts."
 )
@@ -199,7 +234,13 @@ weekday_cols = st.columns((1,) * 2, gap="small")
 if reporting == ReportType.DATAFRAME.value:
     st.write(weekday_counts)
 else:
-    st.bar_chart(data=weekday_counts, x="weekday", y="count", color="weekday", y_label="Weekay counts")
+    st.bar_chart(
+        data=weekday_counts,
+        x="weekday",
+        y="count",
+        color="weekday",
+        y_label="Weekay counts",
+    )
 st.write(
     "Weekends have the minimum number of crashes, specially Sunday. On the other hand, Friday sees the most number of crashes."
 )
@@ -217,13 +258,22 @@ year_cols = st.columns((1,) * 2, gap="small")
 if reporting == ReportType.DATAFRAME.value:
     st.write(year_counts)
 else:
-    st.bar_chart(data=year_counts, x="year", y="count", color="year", y_label="Crash count by year")
+    st.bar_chart(
+        data=year_counts,
+        x="year",
+        y="count",
+        color="year",
+        y_label="Crash count by year",
+    )
 st.write(
     "The most number of crashes were recorded in 2016-18. It seems the number is consistently low after 2020. As of 22 October 2024, 2024 hasn't ended yet so data is incomplete for 2024."
 )
 with st.sidebar:
     st.download_button(
-        label="Download yearly data", data=year_counts.to_pandas().to_csv(), mime="text/csv", file_name="yearly.csv"
+        label="Download yearly data",
+        data=year_counts.to_pandas().to_csv(),
+        mime="text/csv",
+        file_name="yearly.csv",
     )
 
 st.header("Overall Borough Safety")
@@ -232,7 +282,13 @@ borough_cols = st.columns((1,) * 2, gap="small")
 if reporting == ReportType.DATAFRAME.value:
     st.write(borough_counts)
 else:
-    chart = px.bar(data_frame=borough_counts, x="borough", y="count", color="borough", template=template)
+    chart = px.bar(
+        data_frame=borough_counts,
+        x="borough",
+        y="count",
+        color="borough",
+        template=template,
+    )
     chart.update_layout(yaxis_title="Crash count by borough")
     st.plotly_chart(chart)
 with st.sidebar:
@@ -254,14 +310,25 @@ st.write(
 geo_data = load_geo_data()
 
 
-metric_cols = ["distance", "number_of_persons_killed", "number_of_persons_injured", "number_of_casualty"]
+metric_cols = [
+    "distance",
+    "number_of_persons_killed",
+    "number_of_persons_injured",
+    "number_of_casualty",
+]
 
 st.header("Risk Assessment")
 
 if reporting == ReportType.DATAFRAME.value:
     st.write(borough_data)
 else:
-    chart = px.bar(data_frame=borough_data, x="borough", y="risk_factor", template=template, color="borough")
+    chart = px.bar(
+        data_frame=borough_data,
+        x="borough",
+        y="risk_factor",
+        template=template,
+        color="borough",
+    )
     chart.update_layout(yaxis_title="Risk factor")
     st.plotly_chart(chart)
 with st.sidebar:
@@ -271,4 +338,6 @@ with st.sidebar:
         mime="text/csv",
         file_name="borough_risk_factor.csv",
     )
-st.write("According to this, `Manhattan` is the safest and `Staten Island` is the second safest.")
+st.write(
+    "According to this, `Manhattan` is the safest and `Staten Island` is the second safest."
+)
